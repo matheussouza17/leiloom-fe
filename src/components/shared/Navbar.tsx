@@ -1,96 +1,103 @@
 'use client'
 
-import { ArrowRightIcon, ChevronDownIcon } from '@heroicons/react/20/solid'
-import Image from 'next/image'
 import Link from 'next/link'
+import Image from 'next/image'
+import { useState } from 'react'
+import { ArrowRightIcon, Bars3Icon, XMarkIcon } from '@heroicons/react/20/solid'
 
 export default function Navbar() {
+  const [isOpen, setIsOpen] = useState(false)
+
   return (
-    <header className="bg-neutral-900 text-white">
-      <nav className="max-w-7xl mx-auto flex items-center justify-between px-4 sm:px-6 lg:px-8 h-16 relative">
-        {/* Logo */}
-        <div className="flex items-center">
-          <Image src="/logo.png" alt="Logo" width={32} height={32} className="mr-4" />
+    <header className="bg-neutral-900 text-white text-xs font-medium">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+
+        {/* Logo + Nome */}
+        <div className="flex items-center gap-2">
+          <Link href="/" aria-label="Radar Leilão">
+            <Image src="/logo.png" alt="Logo Radar Leilão" width={30} height={27} priority />
+          </Link>
+          <span className="text-sm font-semibold hidden sm:inline">Radar Leilão</span>
         </div>
 
-        {/* Menu */}
-        <ul className="hidden md:flex space-x-6 text-sm font-medium">
-          {/* Dropdown exemplo */}
-          <li className="relative group">
-            <button className="flex items-center gap-1">
-              Sobre a XP
-              <ChevronDownIcon className="h-4 w-4" />
+        {/* Menu Desktop */}
+        <nav className="hidden md:flex items-center gap-6">
+          {/* Dropdown */}
+          <div className="relative group">
+            <button className="flex items-center gap-1 hover:text-yellow-400 transition">
+            Menu 1
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+              </svg>
             </button>
-            <div className="absolute left-0 mt-2 hidden group-hover:block bg-white text-black rounded shadow-lg w-48 z-10">
-              <Link href="#" className="block px-4 py-2 hover:bg-gray-100">Quem somos</Link>
-              <Link href="#" className="block px-4 py-2 hover:bg-gray-100">Nossa história</Link>
-              <Link href="#" className="block px-4 py-2 hover:bg-gray-100">Carreiras</Link>
+            <div className="absolute left-0 top-full mt-2 hidden group-hover:block bg-white text-black rounded shadow-md z-50 min-w-[200px] py-2">
+              <Link href="#" className="block px-4 py-2 hover:bg-gray-100 text-sm">Opção 1</Link>
+              <Link href="#" className="block px-4 py-2 hover:bg-gray-100 text-sm">Opção 2</Link>
+              <Link href="#" className="block px-4 py-2 hover:bg-gray-100 text-sm">Opção 3</Link>
             </div>
-          </li>
+          </div>
 
-          {/* Outros menus com ou sem dropdown */}
-          <li className="relative group">
-            <button className="flex items-center gap-1">
-                Exemplo
-                <ChevronDownIcon className="h-4 w-4" />
-            </button>
+          <Link href="#" className="hover:text-yellow-400 transition">Menu 2</Link>
+          <Link href="#" className="hover:text-yellow-400 transition">Menu 3</Link>
+          <Link href="#" className="hover:text-yellow-400 transition">Menu 4</Link>
+          <Link href="#" className="hover:text-yellow-400 transition">Menu 5</Link>
+        </nav>
 
-            <div className="absolute left-0 mt-4 hidden group-hover:flex bg-neutral-900 text-white rounded shadow-lg z-50 px-8 py-6 w-[900px]">
-                {/* Coluna 1 */}
-                <div className="flex-1">
-                <h4 className="text-sm font-semibold mb-3 text-yellow-400">Exemplo Coluna 1</h4>
-                <ul className="space-y-1 text-sm">
-                    <li><Link href="#" className="hover:underline">Exemplo</Link></li>
-                </ul>
-                </div>
-
-                {/* Coluna 2 */}
-                <div className="flex-1">
-                <h4 className="text-sm font-semibold mb-3 text-yellow-400">Exemplo Coluna 2</h4>
-                <ul className="space-y-1 text-sm">
-                    <li><Link href="#" className="hover:underline">Exemplo</Link></li>
-                </ul>
-                </div>
-
-                {/* Coluna 3 */}
-                <div className="flex-1">
-                <h4 className="text-sm font-semibold mb-3 text-yellow-400">Exemplo Coluna 3</h4>
-                <ul className="space-y-1 text-sm">
-                    <li><Link href="#" className="hover:underline">Exemplo</Link></li>
-                </ul>
-                </div>
-
-                {/* Coluna 4 */}
-                <div className="flex-1">
-                <h4 className="text-sm font-semibold mb-3 text-yellow-400">Exemplo Coluna 4</h4>
-                <ul className="space-y-1 text-sm">
-                    <li><Link href="#" className="hover:underline">Exemplo</Link></li>
-                </ul>
-                </div>
-            </div>
-            </li>
-
-
-          <li><Link href="#">Conteúdos</Link></li>
-          <li><Link href="#">Empresas</Link></li>
-          <li><Link href="#">Área do Trader</Link></li>
-          <li><Link href="#">Tire suas dúvidas</Link></li>
-        </ul>
-
-        {/* Ações à direita */}
-        <div className="flex items-center space-x-4">
-          <Link href="#" className="text-sm text-yellow-400 hover:text-yellow-500 flex items-center">
+        {/* Ações */}
+        <div className="hidden md:flex items-center gap-4">
+          <Link
+            href="#"
+            className="flex items-center text-white hover:text-yellow-400 transition text-[12px]"
+          >
             Acesse sua conta
-            <ArrowRightIcon className="ml-1 h-4 w-4" />
+            <ArrowRightIcon className="ml-1 h-4 w-4 text-white" />
           </Link>
           <Link
             href="#"
-            className="bg-yellow-400 text-black px-4 py-2 rounded font-semibold text-sm hover:bg-yellow-300"
+            className="bg-yellow-400 text-black px-4 py-1.5 text-[12px] rounded hover:bg-yellow-300 transition min-w-[92px] h-[32px] flex items-center justify-center font-medium"
           >
-            Abra sua conta
+            Criar conta
           </Link>
         </div>
-      </nav>
+
+        {/* Botão Mobile de Hamburgeus */}
+        <button
+          onClick={() => setIsOpen(true)}
+          className="md:hidden text-white"
+        >
+          <Bars3Icon className="h-6 w-6" />
+        </button>
+      </div>
+
+      {/* Drawer Mobile */}
+      {isOpen && (
+        <div className="fixed inset-0 bg-black/60 z-50">
+          <div className="fixed left-0 top-0 w-64 h-full bg-white text-black p-6 flex flex-col gap-4 z-50">
+            <div className="flex justify-between items-center mb-4">
+              <span className="text-lg font-bold">Menu</span>
+              <button onClick={() => setIsOpen(false)}>
+                <XMarkIcon className="h-5 w-5" />
+              </button>
+            </div>
+            <Link href="#" onClick={() => setIsOpen(false)} className="hover:text-yellow-600">Leilões</Link>
+            <Link href="#" onClick={() => setIsOpen(false)} className="hover:text-yellow-600">Lotes</Link>
+            <Link href="#" onClick={() => setIsOpen(false)} className="hover:text-yellow-600">Favoritos</Link>
+            <Link href="#" onClick={() => setIsOpen(false)} className="hover:text-yellow-600">Histórico</Link>
+            <Link href="#" onClick={() => setIsOpen(false)} className="hover:text-yellow-600">Contato</Link>
+            <hr />
+            <Link href="#" onClick={() => setIsOpen(false)} className="text-sm text-neutral-700 flex items-center gap-1">
+              Acesse sua conta <ArrowRightIcon className="h-4 w-4" />
+            </Link>
+            <Link
+              href="#"
+              onClick={() => setIsOpen(false)}
+              className="bg-yellow-400 text-black px-4 py-2 rounded text-sm text-center hover:bg-yellow-300 transition"
+            >
+              Criar conta
+            </Link>
+          </div>
+        </div>
+      )}
     </header>
   )
 }
