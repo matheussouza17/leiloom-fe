@@ -1,18 +1,13 @@
-import { ReactNode } from 'react'
-import Head from 'next/head'
+import Navbar from '@/components/shared/Navbar'
 
-export default function MainLayout({ children }: { children: ReactNode }) {
+export default function MainLayout({ children }: { children: React.ReactNode }) {
   return (
-    <>
-      <Head>
-        <title>XP Landing</title>
-        <meta name="description" content="Landing page inspirada na XP" />
-      </Head>
-      <header className="fixed top-0 left-0 w-full bg-white shadow z-50">
-        {/* nav aqui */}
-      </header>
-      <main className="mt-[80px]">{children}</main>
-      <footer className="bg-gray-100 p-6 text-center">© 2025</footer>
-    </>
+    <div className="flex flex-col min-h-screen">
+      <Navbar />
+      <main className="flex-grow">{children}</main>
+      <footer className="bg-gray-100 text-center text-sm p-4 text-gray-500">
+        © {new Date().getFullYear()} - Radar Leilão. Todos os direitos reservados.
+      </footer>
+    </div>
   )
 }

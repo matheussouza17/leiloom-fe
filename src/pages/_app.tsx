@@ -1,12 +1,6 @@
-import {AppProps } from 'next/app';
-import '../../styles/globals.scss';
-import 'react-toastify/dist/ReactToastify.css';
-import {ToastContainer} from 'react-toastify'
+import type { AppProps } from 'next/app'
+import '@/styles/globals.scss'
 
-function MyApp({ Component, pageProps }:AppProps) {
-  return (
-              <ToastContainer autoClose={3000}/> 
-        )
+export default function MyApp({ Component, pageProps }: AppProps) {
+  return <Component {...pageProps} />
 }
-
-export default MyApp

@@ -1,8 +1,7 @@
 Estrutura do projeto:
 
-/nome-do-projeto
-│
-├── public/              # Arquivos estáticos (imagens, fontes, etc.)
+/radar-leilao-fe
+├── public/
 ├── src/
 │   ├── components/      # Componentes reutilizáveis (botões, inputs, headers, etc.)
 │   ├── layouts/         # Estrutura de layout (header, footer, etc.)
@@ -12,3 +11,12 @@ Estrutura do projeto:
 │   ├── types/           # Tipagens globais
 │   ├── hooks/           # Custom React Hooks
 │   └── services/        # API clients (ex: Axios)
+├── .gitignore
+├── README.md
+├── global.d.ts
+├── next.config.ts
+├── package-lock.json
+├── package.json
+├── postcss.config.js
+├── tailwind.config.ts
+└── tsconfig.json
