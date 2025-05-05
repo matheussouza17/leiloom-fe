@@ -1,79 +1,90 @@
 'use client'
 
 import { useForm } from 'react-hook-form'
+import { useEffect, useState } from 'react'
 import { zodResolver } from '@hookform/resolvers/zod'
 import * as z from 'zod'
 import { useRegisterClient } from '@/contexts/RegisterClientContext'
+import { acceptTerms, getCurrentTerms } from '@/services/termsService'
+import { toast } from 'react-toastify'
 
 const schema = z.object({
-  address: z.string().min(5, 'Endereço obrigatório'),
-  acceptTerms: z.boolean().refine(val => val === true, {
-    message: 'Você precisa aceitar os Termos de Uso',
+  cpfCnpj: z.string().min(11, 'CPF ou CNPJ obrigatório'),
+  phone: z.string().min(10, 'Telefone obrigatório'),
+  address: z.string().optional(),
+  acceptTerms: z.literal(true, {
+    errorMap: () => ({ message: 'É necessário aceitar os Termos de Uso' }),
   }),
 })
 
-type FormSchema = z.infer<typeof schema>
+type FormData = z.infer<typeof schema>
 
-interface Props {
-  onBack: () => void
-  onNext: () => void
-}
-
-export default function StepTwoDetails({ onBack, onNext }: Props) {
+export default function StepTwoDetails({ onBack, onNext }: { onBack: () => void; onNext: () => void }) {
+  const [currentTerms, setCurrentTerms] = useState<{ id: string; fileUrl?: string } | null>(null)
   const { formData, setFormData } = useRegisterClient()
-
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-  } = useForm<FormSchema>({
+  const { register, handleSubmit, formState: { errors } } = useForm<FormData>({
     resolver: zodResolver(schema),
     defaultValues: {
-      address: formData.address,
-      acceptTerms: formData.acceptTerms,
-    },
+      cpfCnpj: formData.cpfCnpj,
+      phone: formData.phone,
+      address: formData.address
+    }
   })
+  useEffect(() => {
+    getCurrentTerms().then(term => {
+      if (!term) {
+        toast.error('Termo de uso não encontrado.')
+        return
+      }
+      setCurrentTerms(term)
+    })
+  }, [])
 
-  function onSubmit(data: FormSchema) {
-    setFormData(data)
-    onNext()
+  async function onSubmit(data: FormData) {
+    try {
+      await acceptTerms({
+        clientUserId: formData.clientUserId,
+        termsId: currentTerms?.id||'',
+      })
+      setFormData(data)
+      onNext()
+    } catch (err: any) {
+      toast.error(err?.message || 'Erro ao salvar os dados.')
+    }
   }
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
       <div>
-        <label className="block mb-1 text-sm text-black">Endereço da Empresa</label>
-        <input
-          type="text"
-          {...register('address')}
-          className="w-full border border-gray-300 rounded px-3 py-2 text-black"
-        />
-        {errors.address && <p className="text-red-500 text-xs mt-1">{errors.address.message}</p>}
+        <label className="block mb-1 text-sm text-black">CPF ou CNPJ</label>
+        <input {...register('cpfCnpj')} className="w-full border px-3 py-2 rounded text-black" />
+        {errors.cpfCnpj && <p className="text-red-500 text-xs">{errors.cpfCnpj.message}</p>}
       </div>
 
-      <div className="flex items-start gap-3">
+      <div>
+        <label className="block mb-1 text-sm text-black">Telefone</label>
+        <input {...register('phone')} className="w-full border px-3 py-2 rounded text-black" />
+        {errors.phone && <p className="text-red-500 text-xs">{errors.phone.message}</p>}
+      </div>
+      <div className="flex items-start gap-2">
         <input type="checkbox" {...register('acceptTerms')} className="mt-1" />
-        <label className="text-sm text-gray-700">
-          Eu li e aceito os <a href="#" className="underline">Termos de Uso</a> da plataforma.
+        <label className="text-sm text-black">
+          Eu li e aceito os{' '}
+          {currentTerms?.fileUrl ? (
+            <a href={currentTerms.fileUrl} target="_blank" rel="noopener noreferrer" className="underline text-blue-600">
+              Termos de Uso
+            </a>
+          ) : (
+            <span className="text-gray-500 cursor-not-allowed underline">Termos de Uso</span>
+          )}{' '}
+          da plataforma.
         </label>
       </div>
+
       {errors.acceptTerms && <p className="text-red-500 text-xs">{errors.acceptTerms.message}</p>}
-
       <div className="flex justify-between">
-        <button
-          type="button"
-          onClick={onBack}
-          className="text-sm text-gray-600 hover:underline"
-        >
-          Voltar
-        </button>
-
-        <button
-          type="submit"
-          className="bg-yellow-400 text-black px-4 py-2 rounded hover:bg-yellow-300 transition"
-        >
-          Avançar
-        </button>
+        <button type="button" onClick={onBack} className="text-sm text-gray-600 hover:underline">Voltar</button>
+        <button type="submit" className="bg-yellow-400 text-black px-4 py-2 rounded hover:bg-yellow-300">Avançar</button>
       </div>
     </form>
   )

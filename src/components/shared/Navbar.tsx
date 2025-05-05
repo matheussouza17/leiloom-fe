@@ -14,10 +14,10 @@ export default function Navbar() {
 
         {/* Logo + Nome */}
         <div className="flex items-center gap-2">
-          <Link href="/" aria-label="Radar Leilão">
-            <Image src="/logo.png" alt="Logo Radar Leilão" width={30} height={27} priority />
+          <Link href="/" aria-label="Leiloom">
+            <Image src="/logo.png" alt="Logo Leiloom" width={150} height={150} priority />
           </Link>
-          <span className="text-sm font-semibold hidden sm:inline">Radar Leilão</span>
+          <span className="text-sm font-semibold hidden sm:inline"></span>
         </div>
 
         {/* Menu Desktop */}

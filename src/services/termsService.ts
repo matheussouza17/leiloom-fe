@@ -17,7 +17,7 @@ export async function acceptTerms(payload: { clientUserId: string; termsId: stri
 }
 
 
-export async function getCurrentTerms(): Promise<{ id: string } | null> {
+export async function getCurrentTerms(): Promise<{ id: string, fileUrl: string} | null> {
   try {
     const response = await api.get('/terms/current')
     return response.data

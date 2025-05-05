@@ -1,148 +1,58 @@
 'use client'
 
 import { useForm } from 'react-hook-form'
-import { useRegisterClient } from '@/contexts/RegisterClientContext'
 import { zodResolver } from '@hookform/resolvers/zod'
 import * as z from 'zod'
+import { useRegisterClient } from '@/contexts/RegisterClientContext'
+import { registerClient, registerClientUser } from '@/services/clientService'
+import { toast } from 'react-toastify'
 
-// Schema de validação para o primeiro passo
-const stepOneSchema = z.object({
-  companyName: z.string().min(3, 'Nome da empresa obrigatório'),
-  userName: z.string().min(3, 'Nome do usuário obrigatório'),
+const schema = z.object({
+  companyName: z.string().min(3, 'Nome obrigatório'),
   email: z.string().email('Email inválido'),
-  cpfCnpj: z.string().min(11, 'CPF/CNPJ inválido'),
-  phone: z.string().min(10, 'Telefone inválido'),
-  password: z.string().min(6, 'Senha precisa ter pelo menos 6 caracteres'),
-  confirmPassword: z.string().min(6, 'Confirme a senha'),
-}).refine((data) => data.password === data.confirmPassword, {
-  message: 'As senhas não coincidem',
-  path: ['confirmPassword'],
 })
 
-type StepOneSchema = z.infer<typeof stepOneSchema>
+type FormData = z.infer<typeof schema>
 
-interface StepOneFormProps {
-  onNext: () => void
-}
-
-export default function StepOneForm({ onNext }: StepOneFormProps) {
-  const { formData, setFormData } = useRegisterClient()
-  
-  const { register, handleSubmit, formState: { errors } } = useForm<StepOneSchema>({
-    resolver: zodResolver(stepOneSchema),
-    defaultValues: {
-      companyName: formData.companyName,
-      userName: formData.userName,
-      email: formData.email,
-      cpfCnpj: formData.cpfCnpj,
-      phone: formData.phone,
-      password: formData.password,
-      confirmPassword: formData.password,
-    }
+export default function StepOneForm({ onNext }: { onNext: () => void }) {
+  const { setFormData } = useRegisterClient()
+  const { register, handleSubmit, formState: { errors } } = useForm<FormData>({
+    resolver: zodResolver(schema)
   })
 
-  function handleNext(data: StepOneSchema) {
-    setFormData({
-      companyName: data.companyName,
-      userName: data.userName,
-      email: data.email,
-      cpfCnpj: data.cpfCnpj,
-      phone: data.phone,
-      password: data.password,
-    })
-    onNext()
+  async function onSubmit(data: FormData) {
+    try {
+      const client = await registerClient(data.companyName, '')
+      const clientUser = await registerClientUser(client.id, data.companyName, data.email, '', '', '')
+
+      setFormData({
+        companyName: data.companyName,
+        email: data.email,
+        clientId: client.id,
+        clientUserId: clientUser.id
+      })
+
+      onNext()
+    } catch (err: any) {
+      toast.error(err?.message || 'Erro ao iniciar o cadastro.')
+    }
   }
 
   return (
-    <form onSubmit={handleSubmit(handleNext)} className="space-y-6">
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
       <div>
-        <label className="block mb-1 text-sm text-black">Nome da Empresa</label>
-        <input 
-          type="text" 
-          {...register('companyName')} 
-          className="w-full border border-gray-300 rounded px-3 py-2 text-black" 
-        />
-        {errors.companyName && (
-          <p className="text-red-500 text-xs mt-1">{errors.companyName.message}</p>
-        )}
-      </div>
-
-      <div>
-        <label className="block mb-1 text-sm text-black">Nome do Usuário Principal</label>
-        <input 
-          type="text" 
-          {...register('userName')} 
-          className="w-full border border-gray-300 rounded px-3 py-2 text-black" 
-        />
-        {errors.userName && (
-          <p className="text-red-500 text-xs mt-1">{errors.userName.message}</p>
-        )}
+        <label className="block mb-1 text-sm text-black">Nome</label>
+        <input {...register('companyName')} className="w-full border px-3 py-2 rounded text-black" />
+        {errors.companyName && <p className="text-red-500 text-xs">{errors.companyName.message}</p>}
       </div>
 
       <div>
         <label className="block mb-1 text-sm text-black">Email</label>
-        <input 
-          type="email" 
-          {...register('email')} 
-          className="w-full border border-gray-300 rounded px-3 py-2 text-black" 
-        />
-        {errors.email && (
-          <p className="text-red-500 text-xs mt-1">{errors.email.message}</p>
-        )}
+        <input type="email" {...register('email')} className="w-full border px-3 py-2 rounded text-black" />
+        {errors.email && <p className="text-red-500 text-xs">{errors.email.message}</p>}
       </div>
 
-      <div>
-        <label className="block mb-1 text-sm text-black">CPF ou CNPJ</label>
-        <input 
-          type="text" 
-          {...register('cpfCnpj')} 
-          className="w-full border border-gray-300 rounded px-3 py-2 text-black" 
-        />
-        {errors.cpfCnpj && (
-          <p className="text-red-500 text-xs mt-1">{errors.cpfCnpj.message}</p>
-        )}
-      </div>
-
-      <div>
-        <label className="block mb-1 text-sm text-black">Telefone</label>
-        <input 
-          type="text" 
-          {...register('phone')} 
-          className="w-full border border-gray-300 rounded px-3 py-2 text-black" 
-        />
-        {errors.phone && (
-          <p className="text-red-500 text-xs mt-1">{errors.phone.message}</p>
-        )}
-      </div>
-
-      <div>
-        <label className="block mb-1 text-sm text-black">Senha</label>
-        <input 
-          type="password" 
-          {...register('password')} 
-          className="w-full border border-gray-300 rounded px-3 py-2 text-black" 
-        />
-        {errors.password && (
-          <p className="text-red-500 text-xs mt-1">{errors.password.message}</p>
-        )}
-      </div>
-
-      <div>
-        <label className="block mb-1 text-sm text-black">Confirme a Senha</label>
-        <input 
-          type="password" 
-          {...register('confirmPassword')} 
-          className="w-full border border-gray-300 rounded px-3 py-2 text-black" 
-        />
-        {errors.confirmPassword && (
-          <p className="text-red-500 text-xs mt-1">{errors.confirmPassword.message}</p>
-        )}
-      </div>
-
-      <button
-        type="submit"
-        className="w-full bg-yellow-400 text-black py-2 rounded hover:bg-yellow-300 transition"
-      >
+      <button type="submit" className="w-full bg-yellow-400 text-black py-2 rounded hover:bg-yellow-300">
         Avançar
       </button>
     </form>
