@@ -11,15 +11,19 @@ import { toast } from 'react-toastify'
 const schema = z.object({
   cpfCnpj: z.string().min(11, 'CPF ou CNPJ obrigatório'),
   phone: z.string().min(10, 'Telefone obrigatório'),
-  address: z.string().optional(),
+  password: z.string().min(6, 'Senha precisa ter pelo menos 6 caracteres'),
+  confirmPassword: z.string().min(6, 'Confirme a senha'),
   acceptTerms: z.literal(true, {
     errorMap: () => ({ message: 'É necessário aceitar os Termos de Uso' }),
   }),
+}).refine((data) => data.password === data.confirmPassword, {
+  message: 'As senhas não coincidem',
+  path: ['confirmPassword'],
 })
 
 type FormData = z.infer<typeof schema>
 
-export default function StepTwoDetails({ onBack, onNext }: { onBack: () => void; onNext: () => void }) {
+export default function StepThreeDetails({ onNext }: { onNext: () => void }) {
   const [currentTerms, setCurrentTerms] = useState<{ id: string; fileUrl?: string } | null>(null)
   const { formData, setFormData } = useRegisterClient()
   const { register, handleSubmit, formState: { errors } } = useForm<FormData>({
@@ -27,7 +31,7 @@ export default function StepTwoDetails({ onBack, onNext }: { onBack: () => void;
     defaultValues: {
       cpfCnpj: formData.cpfCnpj,
       phone: formData.phone,
-      address: formData.address
+      password: formData.password
     }
   })
   useEffect(() => {
@@ -66,6 +70,19 @@ export default function StepTwoDetails({ onBack, onNext }: { onBack: () => void;
         <input {...register('phone')} className="w-full border px-3 py-2 rounded text-black" />
         {errors.phone && <p className="text-red-500 text-xs">{errors.phone.message}</p>}
       </div>
+      <hr className="border-t border-gray-300 my-4" />
+      <div>
+        <label className="block mb-1 text-sm text-black">Senha</label>
+        <input type="password" {...register('password')} className="w-full border border-gray-300 rounded px-3 py-2 text-black" />
+        {errors.password && <p className="text-red-500 text-xs mt-1">{errors.password.message}</p>}
+      </div>
+
+      <div>
+        <label className="block mb-1 text-sm text-black">Confirme a Senha</label>
+        <input type="password" {...register('confirmPassword')} className="w-full border border-gray-300 rounded px-3 py-2 text-black" />
+        {errors.confirmPassword && <p className="text-red-500 text-xs mt-1">{errors.confirmPassword.message}</p>}
+      </div>
+
       <div className="flex items-start gap-2">
         <input type="checkbox" {...register('acceptTerms')} className="mt-1" />
         <label className="text-sm text-black">
@@ -82,10 +99,10 @@ export default function StepTwoDetails({ onBack, onNext }: { onBack: () => void;
       </div>
 
       {errors.acceptTerms && <p className="text-red-500 text-xs">{errors.acceptTerms.message}</p>}
-      <div className="flex justify-between">
-        <button type="button" onClick={onBack} className="text-sm text-gray-600 hover:underline">Voltar</button>
-        <button type="submit" className="bg-yellow-400 text-black px-4 py-2 rounded hover:bg-yellow-300">Avançar</button>
-      </div>
+      
+      <button type="submit" className="w-full bg-yellow-400 text-black py-2 rounded hover:bg-yellow-300">
+        Avançar
+      </button>
     </form>
   )
 }

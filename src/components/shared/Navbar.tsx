@@ -53,7 +53,7 @@ export default function Navbar() {
             <ArrowRightIcon className="ml-1 h-4 w-4 text-white" />
           </Link>
           <Link
-            href="#"
+            href="/register-client"
             className="bg-yellow-400 text-black px-4 py-1.5 text-[12px] rounded hover:bg-yellow-300 transition min-w-[92px] h-[32px] flex items-center justify-center font-medium"
           >
             Criar conta

@@ -85,6 +85,7 @@ export async function registerClientUser(
  * @param email Email do usuário
  * @param cpfCnpj CPF ou CNPJ do usuário
  * @param phone Telefone do usuário
+ * @param password Senha do usuário
  * @returns Dados do usuário cadastrado
  */
 export async function updateClientUser(
@@ -93,6 +94,7 @@ export async function updateClientUser(
   email: string,
   cpfCnpj: string,
   phone: string,
+  password?: string,
 ) {
   try {
     const response = await api.patch(`/client-users/${clientId}`, {
@@ -100,6 +102,7 @@ export async function updateClientUser(
       email,
       cpfCnpj,
       phone,
+      password,
     })
     
     return response.data

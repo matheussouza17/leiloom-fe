@@ -13,20 +13,20 @@ interface StepThreePlansProps {
 }
 
 const plans = [
-  { name: 'Starter', price: 'Grátis', features: ['1 usuário', 'Sem suporte'] },
-  { name: 'Essencial', price: 'R$ 49/mês', features: ['5 usuários', 'Suporte por e-mail'] },
-  { name: 'Profissional', price: 'R$ 149/mês', features: ['10 usuários', 'Suporte rápido'] },
-  { name: 'Enterprise', price: 'R$ 499/mês', features: ['Ilimitado', 'Suporte dedicado'] },
+  { name: 'Starter', price: 'Grátis', features: ['1 usuário', 'Sem suporte'] , isTrial: true},
+  { name: 'Essencial', price: 'R$ 49/mês', features: ['5 usuários', 'Suporte por e-mail'], isTrial: false },
+  { name: 'Profissional', price: 'R$ 149/mês', features: ['10 usuários', 'Suporte rápido'], isTrial: false },
+  { name: 'Enterprise', price: 'R$ 499/mês', features: ['Ilimitado', 'Suporte dedicado'], isTrial: false },
 ]
 
-export default function StepThreePlans({ onBack }: StepThreePlansProps) {
+export default function StepFourPlans({ onBack }: StepThreePlansProps) {
   const { formData } = useRegisterClient()
   const router = useRouter()
   const [loading, setLoading] = useState(false)
-  const [selectedPlan, setSelectedPlan] = useState<string | null>(null)
+  const [selectedPlan, setSelectedPlan] = useState<{ name: string; isTrial: boolean } | null>(null) 
 
   async function handleFinish() {
-    await updateClientUser(formData.clientUserId, formData.companyName, formData.email, formData.cpfCnpj, formData.phone)
+    await updateClientUser(formData.clientUserId, formData.companyName, formData.email, formData.cpfCnpj, formData.phone, formData.password)
     await updateClient(formData.clientId, formData.companyName, formData.cpfCnpj)
     
     if (!selectedPlan) {
@@ -55,7 +55,7 @@ export default function StepThreePlans({ onBack }: StepThreePlansProps) {
       const token = await loginClient(formData.email, formData.password)
       localStorage.setItem('token', token)
       toast.success('Conta criada com sucesso!')
-      router.push('/dashboard')
+      router.push('/dashboard-client')
     } catch (err: any) {
       toast.error(err?.message || 'Erro ao concluir o cadastro.')
     } finally {
@@ -73,9 +73,9 @@ export default function StepThreePlans({ onBack }: StepThreePlansProps) {
           <button
             key={plan.name}
             type="button"
-            onClick={() => setSelectedPlan(plan.name)}
+            onClick={() => setSelectedPlan({ name: plan.name, isTrial: plan.isTrial })}
             className={`border rounded-lg p-4 text-left shadow-sm transition ${
-              selectedPlan === plan.name
+              selectedPlan?.name === plan.name
                 ? 'border-yellow-500 bg-yellow-100'
                 : 'border-black-300'
             }`}
@@ -107,7 +107,12 @@ export default function StepThreePlans({ onBack }: StepThreePlansProps) {
               : 'bg-gray-300 text-gray-500 cursor-not-allowed'
           }`}
         >
-          {loading ? 'Finalizando...' : 'Concluir'}
+          {loading
+          ? 'Finalizando...'
+          : selectedPlan?.isTrial
+            ? 'Concluir'
+            : 'Avançar'}
+
         </button>
       </div>
     </div>

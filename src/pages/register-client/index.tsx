@@ -3,8 +3,9 @@
 import { useState } from 'react'
 import { RegisterClientProvider } from '@/contexts/RegisterClientContext'
 import StepOneForm from './StepOneForm'
-import StepTwoDetails from './StepTwoDetails'
-import StepThreePlans from './StepThreePlans'
+import StepTwoEmailCode from './StepTwoEmailCode' 
+import StepThreeDetails from './StepThreeDetails'
+import StepFourPlans from './StepFourPlans'
 import MainLayout from '@/layouts/MainLayout'
 export default function RegisterClientPage() {
   return (
@@ -32,17 +33,20 @@ function WizardContent() {
       <div className="bg-white p-8 rounded shadow-md w-full max-w-md">
         <h1 className="text-2xl font-bold mb-6 text-center text-gray-900">
           {step === 1 && 'Crie sua conta - Dados básicos'}
-          {step === 2 && 'Preencha seus dados pessoais'}
-          {step === 3 && 'Escolha seu plano'}
+          {step === 2 && 'Verifique seu e-mail'}
+          {step === 3 && 'Preencha seus dados pessoais'}
+          {step === 4 && 'Escolha seu plano'}
         </h1>
 
-        {step === 1 && <StepOneForm onNext={handleNextStep} />}
-        {step === 2 && <StepTwoDetails onNext={handleNextStep} onBack={handlePreviousStep} />}
-        {step === 3 && <StepThreePlans onBack={handlePreviousStep} />}
+        {step === 1 && <StepOneForm onNext={() => setStep(2)} />}
+        {step === 2 && <StepTwoEmailCode onNext={() => setStep(3)} onBack={() => setStep(1)} />}
+        {step === 3 && <StepThreeDetails onNext={() => setStep(4)} />}
+        {step === 4 && <StepFourPlans onBack={() => setStep(3)} />}
+
 
         <div className="flex justify-center mt-6">
           <div className="flex space-x-2">
-            {[1, 2, 3].map((s) => (
+            {[1, 2, 3, 4].map((s) => (
               <div
                 key={s}
                 className={`w-3 h-3 rounded-full ${s === step ? 'bg-yellow-400' : 'bg-gray-300'}`}

@@ -41,7 +41,7 @@ export default function StepOneForm({ onNext }: { onNext: () => void }) {
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
       <div>
-        <label className="block mb-1 text-sm text-black">Nome</label>
+        <label className="block mb-1 text-sm text-black">Nome (Pessoal ou Empresarial)</label>
         <input {...register('companyName')} className="w-full border px-3 py-2 rounded text-black" />
         {errors.companyName && <p className="text-red-500 text-xs">{errors.companyName.message}</p>}
       </div>
