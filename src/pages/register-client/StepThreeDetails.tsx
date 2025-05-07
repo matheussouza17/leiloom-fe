@@ -11,7 +11,12 @@ import { toast } from 'react-toastify'
 const schema = z.object({
   cpfCnpj: z.string().min(11, 'CPF ou CNPJ obrigatório'),
   phone: z.string().min(10, 'Telefone obrigatório'),
-  password: z.string().min(6, 'Senha precisa ter pelo menos 6 caracteres'),
+  password: z.string()
+    .min(6, 'Senha precisa ter pelo menos 6 caracteres')
+    .regex(/[A-Z]/, 'Deve conter ao menos uma letra maiúscula')
+    .regex(/[a-z]/, 'Deve conter ao menos uma letra minúscula')
+    .regex(/[0-9]/, 'Deve conter ao menos um número')
+    .regex(/[^A-Za-z0-9]/, 'Deve conter ao menos um caractere especial'),
   confirmPassword: z.string().min(6, 'Confirme a senha'),
   acceptTerms: z.literal(true, {
     errorMap: () => ({ message: 'É necessário aceitar os Termos de Uso' }),
@@ -20,6 +25,7 @@ const schema = z.object({
   message: 'As senhas não coincidem',
   path: ['confirmPassword'],
 })
+
 
 type FormData = z.infer<typeof schema>
 

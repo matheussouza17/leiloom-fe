@@ -46,7 +46,7 @@ export default function Navbar() {
         {/* Ações */}
         <div className="hidden md:flex items-center gap-4">
           <Link
-            href="#"
+            href="/login"
             className="flex items-center text-white hover:text-yellow-400 transition text-[12px]"
           >
             Acesse sua conta
