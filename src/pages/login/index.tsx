@@ -86,7 +86,9 @@ export default function LoginPage() {
         }),
       }
       
-      console.log('Payload:', payload) // Debugging line
+      if (personType === 'PJ' && !data.cnpj) {
+        return toast.error('CNPJ ou E-mail da empresa é obrigatório.')
+      }  
       
       const token = await loginClient(payload)
       localStorage.setItem('token', token)
