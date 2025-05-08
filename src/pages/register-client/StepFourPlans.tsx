@@ -52,7 +52,11 @@ export default function StepFourPlans({ onBack }: StepThreePlansProps) {
         termsId: currentTerms.id,
       })
 
-      const token = await loginClient(formData.email, formData.password)
+      const token = await loginClient({
+        login: formData.email,
+        password: formData.password,
+        context: 'CLIENT',
+      })
       localStorage.setItem('token', token)
       toast.success('Conta criada com sucesso!')
       router.push('/dashboard-client')
