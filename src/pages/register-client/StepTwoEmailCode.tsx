@@ -21,6 +21,7 @@ export default function StepTwoEmailCode({
   onNext: () => void
 }) {
   const { formData } = useRegisterClient()
+  if (!formData?.email) return null;
   const { register, handleSubmit, formState: { errors } } = useForm<FormData>({
     resolver: zodResolver(schema),
   })

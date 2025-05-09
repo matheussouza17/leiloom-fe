@@ -32,6 +32,7 @@ type FormData = z.infer<typeof schema>
 export default function StepThreeDetails({ onNext }: { onNext: () => void }) {
   const [currentTerms, setCurrentTerms] = useState<{ id: string; fileUrl?: string } | null>(null)
   const { formData, setFormData } = useRegisterClient()
+  if (!formData?.clientUserId) return null;
   const { register, handleSubmit, formState: { errors } } = useForm<FormData>({
     resolver: zodResolver(schema),
     defaultValues: {
