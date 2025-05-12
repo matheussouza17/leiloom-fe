@@ -4,52 +4,30 @@ import { useEffect, useState, ComponentType } from 'react'
 import { useRouter } from 'next/navigation'
 import { decodeToken, TokenPayload } from '@/utils/jwtUtils'
 
-interface WithAuthProps {
-  user: TokenPayload
-}
+export function useAuth(context: 'CLIENT' | 'BACKOFFICE') {
+  const [user, setUser] = useState<TokenPayload | null>(null)
+  const [loading, setLoading] = useState(true)
+  const router = useRouter()
+  const storageKey = context === 'CLIENT' ? 'clientToken' : 'backofficeToken'
+  const loginPath = context === 'CLIENT' ? '/login' : '/login-backoffice'
 
-export function withAuth<T extends object>(WrappedComponent: ComponentType<T & WithAuthProps>) {
+  useEffect(() => {
+    const token = localStorage.getItem(storageKey)
+    if (!token) {
+      router.replace(loginPath)
+      return setLoading(false)
+    }
 
-  return function WithAuthComponent(props: T) {
-    const [user, setUser] = useState<TokenPayload | null>(null)
-    const [loading, setLoading] = useState(true)
-    const router = useRouter()
+    const payload = decodeToken(token)
+    if (!payload || payload.context !== context || payload.exp * 1000 < Date.now()) {
+      localStorage.removeItem(storageKey)
+      router.replace(loginPath)
+      return setLoading(false)
+    }
 
-    console.log('withAuth HOC called')
-    useEffect(() => {
-        const token = localStorage.getItem('token')
-        console.log('raw token:', token)
-        if (!token) {
-          console.log('nenhum token encontrado')
-          router.push('/login')
-          return
-        }
-      
-        const payload = decodeToken(token)
-        console.log('decoded payload:', payload)
-        if (!payload) {
-          console.log('payload null → token inválido')
-          localStorage.removeItem('token')
-          router.push('/login')
-          return
-        }
-      
-        const expiresAt = payload.exp * 1000
-        console.log('expiresAt:', new Date(expiresAt), 'now:', new Date())
-        if (expiresAt > Date.now()) {
-          setUser(payload)
-        } else {
-          console.log('token já expirou')
-          localStorage.removeItem('token')
-          router.push('/login')
-        }
-      
-        setLoading(false)
-      }, [])
-      
+    setUser(payload)
+    setLoading(false)
+  }, [])
 
-    if (loading || !user) return null
-
-    return <WrappedComponent {...props} user={user} />
-  }
+  return { user, loading }
 }

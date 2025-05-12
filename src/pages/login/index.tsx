@@ -8,6 +8,7 @@ import { toast } from 'react-toastify'
 import { useRouter } from 'next/navigation'
 import { loginClient } from '@/services/authService'
 import MainLayout from '@/layouts/MainLayout'
+import { useAuthContext } from '@/contexts/AuthContext'
 
 const schema = z.object({
   personType: z.enum(['PF', 'PJ']),
@@ -24,6 +25,7 @@ export default function LoginPage() {
   const [personType, setPersonType] = useState<'PF' | 'PJ'>('PF')
   const [isAdmin, setIsAdmin] = useState(false)
   const [isTransitioning, setIsTransitioning] = useState(false)
+  const { login } = useAuthContext()
 
   const {
     register,
@@ -91,7 +93,8 @@ export default function LoginPage() {
       }  
       
       const token = await loginClient(payload)
-      localStorage.setItem('token', token)
+      localStorage.setItem('clientToken', token)
+      login(token, 'CLIENT') 
       toast.success('Login realizado com sucesso!')
       router.push('/dashboard-client')
     } catch (err: any) {

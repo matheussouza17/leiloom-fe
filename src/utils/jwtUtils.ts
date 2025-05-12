@@ -18,7 +18,6 @@ export interface TokenPayload {
       )
       return JSON.parse(json) as TokenPayload
     } catch (err) {
-      console.error('Erro ao decodificar JWT manualmente:', err)
       return null
     }
   }

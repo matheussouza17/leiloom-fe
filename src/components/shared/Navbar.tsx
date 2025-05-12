@@ -3,19 +3,21 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import { useState } from 'react'
-import { ArrowRightIcon, Bars3Icon, XMarkIcon, UserCircleIcon, ArrowRightOnRectangleIcon } from '@heroicons/react/20/solid'
-import { useAuth } from '@/hooks/useAuth'         // ajuste para o caminho real
+import { ArrowRightIcon, Bars3Icon, XMarkIcon, UserCircleIcon, ArrowRightOnRectangleIcon } from '@heroicons/react/20/solid'      // ajuste para o caminho real
 import { useRouter } from 'next/navigation'
+import { useAuthContext } from '@/contexts/AuthContext'
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false)
-  const { user, isAuthenticated } = useAuth()
   const router = useRouter()
+  
+  const { user, logout } = useAuthContext()
+  const isAuthenticated = !!user
 
-  const handleLogout = () => {
-    localStorage.removeItem('token')
-    router.push('/')
-  }
+const handleLogout = () => {
+  logout('CLIENT') 
+  router.push('/')
+}
 
   return (
     <header className="bg-neutral-900 text-white text-xs font-medium">

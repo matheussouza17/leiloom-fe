@@ -1,13 +1,14 @@
 import { api } from './api'
 
-
-export async function loginClient(data: {
+interface LoginClientPayload {
   login: string
   password: string
   context: 'CLIENT'
   cnpj?: string
   isAdmin?: boolean
-}) {
+}
+
+export async function loginClient(data: LoginClientPayload) {
   try {
     const response = await api.post('/auth/login-client', data)
     return response.data.access_token
@@ -27,6 +28,31 @@ export async function loginClient(data: {
   }
 }
 
+interface BackOfficePayload {
+  login: string
+  password: string
+  context: 'BACKOFFICE'
+}
+
+export async function loginBackOffice(payload: BackOfficePayload) {
+  try {
+    const response = await api.post('/auth/login-client', payload)
+    return response.data.access_token
+  } catch (error: any) {
+    if (error?.response?.status === 401) {
+      return Promise.reject({ message: 'Login ou senha inválidos.' })
+    }
+    if (error?.response?.status === 403) {
+      return Promise.reject({ message: 'Acesso negado.' })
+    }
+    if (error?.response?.status === 409) {
+      return Promise.reject({ message: 'Este e-mail já está em uso.' })
+    }
+    if (error?.response?.status === 500) { 
+      return Promise.reject({ message: 'Erro interno do servidor.' })
+    }
+  }
+}
 
 
 export async function verifyEmailCode(email: string, code: string) {
