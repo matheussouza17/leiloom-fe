@@ -49,8 +49,11 @@ const handleLogout = () => {
 
           <Link href="#" className="hover:text-yellow-400 transition">Menu 2</Link>
           <Link href="#" className="hover:text-yellow-400 transition">Menu 3</Link>
-          <Link href="#" className="hover:text-yellow-400 transition">Menu 4</Link>
-          <Link href="#" className="hover:text-yellow-400 transition">Menu 5</Link>
+          {user?.context === 'BACKOFFICE' && (
+          <Link href="/admin/terms" className="hover:text-yellow-400 transition">
+            Termos
+          </Link>
+        )}
         </nav>
 
         {/* Ações Desktop */}
@@ -111,8 +114,15 @@ const handleLogout = () => {
             {/* links gerais */}
             <Link href="#" onClick={() => setIsOpen(false)} className="hover:text-yellow-600">Leilões</Link>
             <Link href="#" onClick={() => setIsOpen(false)} className="hover:text-yellow-600">Lotes</Link>
-            {/* ... */}
-
+            {user?.context === 'BACKOFFICE' && (
+              <Link
+                href="/admin/terms"
+                onClick={() => setIsOpen(false)}
+                className="hover:text-yellow-600"
+              >
+                Termos
+              </Link>
+            )}
             <hr />
 
             {/* Ações Mobile */}

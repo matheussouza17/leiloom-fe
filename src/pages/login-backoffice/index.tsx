@@ -28,7 +28,6 @@ export default function BackOfficeLoginPage() {
   async function onSubmit(data: FormData) {
     setLoading(true)
     try {
-      // Chama o serviço de login do back-office
       const token = await loginBackOffice({
         login: data.login,
         password: data.password,
