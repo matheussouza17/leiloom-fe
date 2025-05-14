@@ -221,7 +221,7 @@ function PlansAdminPage({ user }: Props) {
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Preço</th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Duração</th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tipo</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ativo</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Situação</th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ações</th>
                   </tr>
                 </thead>
@@ -421,6 +421,7 @@ function PlansAdminPage({ user }: Props) {
                       </div>
                       <div className="ml-3 text-sm">
                         <label htmlFor="isActive" className="font-medium text-gray-700">Ativo</label>
+                        <p className="text-gray-500">Define se o plano está ativo ou não.</p>
                       </div>
                     </div>
 
