@@ -7,6 +7,7 @@ import { toast } from 'react-toastify'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 import { updateClientUser, updateClient } from '@/services/clientService'
+import { useAuthContext } from '@/contexts/AuthContext'
 
 interface StepThreePlansProps {
   onBack: () => void
@@ -24,6 +25,7 @@ export default function StepFourPlans({ onBack }: StepThreePlansProps) {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
   const [selectedPlan, setSelectedPlan] = useState<{ name: string; isTrial: boolean } | null>(null) 
+  const { login } = useAuthContext()
 
   async function handleFinish() {
     await updateClientUser(formData.clientUserId, formData.companyName, formData.email, formData.cpfCnpj, formData.phone, formData.password)
@@ -57,7 +59,9 @@ export default function StepFourPlans({ onBack }: StepThreePlansProps) {
         password: formData.password,
         context: 'CLIENT',
       })
-      localStorage.setItem('token', token)
+      localStorage.setItem('clientToken', token)
+      login(token, 'CLIENT') 
+
       toast.success('Conta criada com sucesso!')
       router.push('/dashboard-client')
     } catch (err: any) {
