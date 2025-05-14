@@ -50,9 +50,15 @@ const handleLogout = () => {
           <Link href="#" className="hover:text-yellow-400 transition">Menu 2</Link>
           <Link href="#" className="hover:text-yellow-400 transition">Menu 3</Link>
           {user?.context === 'BACKOFFICE' && (
-          <Link href="/admin/terms" className="hover:text-yellow-400 transition">
-            Termos
+          <>
+            <Link href="/admin/terms" className="hover:text-yellow-400 transition">
+              Termos
+            </Link>
+            <Link href="/admin/plans" className="hover:text-yellow-400 transition">
+              Planos
           </Link>
+          </>
+          
         )}
         </nav>
 
@@ -90,6 +96,12 @@ const handleLogout = () => {
               >
                 Criar conta
               </Link>
+              <Link
+                  href="/login-backoffice"
+                  className="flex items-center text-white hover:text-yellow-400 transition text-[12px] ml-4"
+                >
+                  Acesse o Backoffice
+                </Link>
             </>
           )}
         </div>
@@ -158,7 +170,15 @@ const handleLogout = () => {
                 >
                   Criar conta
                 </Link>
+                <Link
+                  href="/login-backoffice"
+                  onClick={() => setIsOpen(false)}
+                  className="text-sm text-neutral-700 flex items-center gap-1"
+                >
+                  Acesse o BackOffice <ArrowRightIcon className="h-4 w-4" />
+                </Link>
               </>
+              
             )}
           </div>
         </div>

@@ -32,8 +32,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }
 
   function logout(context: 'CLIENT' | 'BACKOFFICE') {
-    const key = context === 'CLIENT' ? 'clientToken' : 'backofficeToken'
-    localStorage.removeItem(key)
+    localStorage.removeItem('clientToken')
+    localStorage.removeItem('backofficeToken')
     setUser(null)
   }
 

@@ -8,6 +8,7 @@ import { toast } from 'react-toastify'
 import { useRouter } from 'next/navigation'
 import { loginBackOffice } from '@/services/authService' 
 import MainLayout from '@/layouts/MainLayout'
+import { useAuthContext } from '@/contexts/AuthContext'
 
 const schema = z.object({
   login: z.string().min(3, 'Informe usuário ou e-mail'),
@@ -19,7 +20,7 @@ type FormData = z.infer<typeof schema>
 export default function BackOfficeLoginPage() {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
-
+  const { login } = useAuthContext()
   const { register, handleSubmit, formState: { errors } } = useForm<FormData>({
     resolver: zodResolver(schema),
     defaultValues: { login: '', password: '' }
@@ -34,6 +35,7 @@ export default function BackOfficeLoginPage() {
         context: 'BACKOFFICE' as const
       })
       localStorage.setItem('backofficeToken', token)
+      login(token, 'BACKOFFICE')
       toast.success('Bem-vindo ao Back-Office!')
       router.push('/dashboard-backoffice')
     } catch (err: any) {

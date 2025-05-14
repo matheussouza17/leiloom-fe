@@ -8,6 +8,7 @@ import { withBackofficeAuth } from '@/hooks/withBackofficeAuth'
 import { TokenPayload } from '@/utils/jwtUtils'
 import { Dialog, Transition } from '@headlessui/react'
 import { Fragment } from 'react'
+import Pagination from '@/components/shared/Pagination'
 
 /**
  * Interface para o objeto de termo
@@ -33,6 +34,8 @@ function TermsAdminPage({ user }: Props) {
   const [isLoading, setIsLoading] = useState<boolean>(false)
   const [isOpenModal, setIsOpenModal] = useState<boolean>(false)
   const [currentAction, setCurrentAction] = useState<'create' | 'edit'>('create')
+  const [currentPage, setCurrentPage] = useState(1)
+  const termsPerPage = 10
 
   /**
    * Carrega a lista de termos do servidor
@@ -49,6 +52,12 @@ function TermsAdminPage({ user }: Props) {
       setIsLoading(false)
     }
   }
+
+    const totalPages = Math.ceil(terms.length / termsPerPage)
+    const paginatedTerms = terms.slice(
+    (currentPage - 1) * termsPerPage,
+      currentPage * termsPerPage
+  )
 
   useEffect(() => {
     loadTerms()
@@ -114,9 +123,10 @@ function TermsAdminPage({ user }: Props) {
 
   return (
     <MainLayout>
-      <div className="max-w-5xl mx-auto py-8 px-4">
+      <div className="min-h-screen flex justify-center bg-gray-50">
+      <div className="mx-auto py-4 px-4 w-full max-w-none">
         <div className="flex justify-between items-center mb-8">
-          <h1 className="text-2xl font-bold">Gerenciamento de Termos de Uso</h1>
+          <h1 className="text-2xl font-bold text-gray-500 ">Gerenciamento de Termos de Uso</h1>
           <button 
             onClick={handleNewTerm} 
             className="bg-yellow-400 text-black font-medium px-5 py-2 rounded-md hover:bg-yellow-500 transition-colors disabled:opacity-50 flex items-center gap-2"
@@ -130,14 +140,11 @@ function TermsAdminPage({ user }: Props) {
         </div>
         
         <div className="bg-white rounded-lg shadow-md overflow-hidden">
-          {/* Cabeçalho da área principal */}
           <div className="border-b px-6 py-4">
             <p className="text-sm text-gray-500">
               Gerencie os termos de uso da plataforma. O termo marcado como atual será exibido para os usuários.
             </p>
           </div>
-
-          {/* Tabela de termos */}
           {isLoading && !terms.length ? (
             <div className="py-12 text-center">
               <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-yellow-400"></div>
@@ -145,7 +152,7 @@ function TermsAdminPage({ user }: Props) {
             </div>
           ) : terms.length > 0 ? (
             <div className="overflow-x-auto">
-              <table className="w-full">
+              <table className="w-full min-w-[600px]">
                 <thead>
                   <tr className="bg-gray-50">
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Descrição</th>
@@ -155,9 +162,9 @@ function TermsAdminPage({ user }: Props) {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-200">
-                  {terms.map((term) => (
+                  {paginatedTerms.map((term) => (
                     <tr key={term.id} className="hover:bg-gray-50">
-                      <td className="px-6 py-4 whitespace-nowrap">{term.description}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-gray-500 ">{term.description}</td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <a 
                           href={term.fileUrl} 
@@ -195,7 +202,15 @@ function TermsAdminPage({ user }: Props) {
                   ))}
                 </tbody>
               </table>
+              <Pagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                onPageChange={(p) => {
+                  if (p >= 1 && p <= totalPages) setCurrentPage(p)
+                }}
+              />
             </div>
+            
           ) : (
             <div className="py-12 text-center text-gray-500">
               <svg xmlns="http://www.w3.org/2000/svg" className="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -272,7 +287,7 @@ function TermsAdminPage({ user }: Props) {
                         required
                         placeholder="https://exemplo.com/termos.pdf"
                         defaultValue={editingTerm?.fileUrl || ''} 
-                        className="w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-yellow-500 focus:border-yellow-500" 
+                        className="w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-yellow-500 focus:border-yellow-500 text-gray-500" 
                         disabled={isLoading}
                       />
                     </div>
@@ -285,7 +300,7 @@ function TermsAdminPage({ user }: Props) {
                         required
                         placeholder="Ex: Termos de Uso v1.0"
                         defaultValue={editingTerm?.description || ''} 
-                        className="w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-yellow-500 focus:border-yellow-500" 
+                        className="w-full border border-gray-300 rounded-md shadow-sm p-2 text-gray-500 focus:ring-yellow-500 focus:border-yellow-500" 
                         disabled={isLoading}
                       />
                     </div>
@@ -339,9 +354,9 @@ function TermsAdminPage({ user }: Props) {
           </div>
         </Dialog>
       </Transition>
+      </div>
     </MainLayout>
   )
 }
 
-// Exportando o componente com proteção de autenticação
 export default withBackofficeAuth(TermsAdminPage)
