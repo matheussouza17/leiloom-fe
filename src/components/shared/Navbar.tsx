@@ -35,7 +35,7 @@ const handleLogout = () => {
           {/* Dropdown */}
           <div className="relative group">
             <button className="flex items-center gap-1 hover:text-yellow-400 transition">
-            Menu 1
+            Menu All
               <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
               </svg>
@@ -47,15 +47,24 @@ const handleLogout = () => {
             </div>
           </div>
 
-          <Link href="#" className="hover:text-yellow-400 transition">Menu 2</Link>
-          <Link href="#" className="hover:text-yellow-400 transition">Menu 3</Link>
+          <Link href="#" className="hover:text-yellow-400 transition">Opção All</Link>
+          {user?.context === 'CLIENT' && (
+          <>
+            <Link href="#" className="hover:text-yellow-400 transition">
+              Opção Cliente
+            </Link>
+          </>
+        )}
           {user?.context === 'BACKOFFICE' && (
           <>
-            <Link href="/admin/terms" className="hover:text-yellow-400 transition">
+            <Link href="/backoffice/terms" className="hover:text-yellow-400 transition">
               Termos
             </Link>
-            <Link href="/admin/plans" className="hover:text-yellow-400 transition">
+            <Link href="/backoffice/plans" className="hover:text-yellow-400 transition">
               Planos
+          </Link>
+          <Link href="/backoffice/clients" className="hover:text-yellow-400 transition">
+              Clientes
           </Link>
           </>
           
@@ -96,12 +105,6 @@ const handleLogout = () => {
               >
                 Criar conta
               </Link>
-              <Link
-                  href="/login-backoffice"
-                  className="flex items-center text-white hover:text-yellow-400 transition text-[12px] ml-4"
-                >
-                  Acesse o Backoffice
-                </Link>
             </>
           )}
         </div>
@@ -125,15 +128,39 @@ const handleLogout = () => {
 
             {/* links gerais */}
             <Link href="#" onClick={() => setIsOpen(false)} className="hover:text-yellow-600">Leilões</Link>
-            <Link href="#" onClick={() => setIsOpen(false)} className="hover:text-yellow-600">Lotes</Link>
-            {user?.context === 'BACKOFFICE' && (
+            {user?.context === 'CLIENT' && (
               <Link
-                href="/admin/terms"
+                href="#"
                 onClick={() => setIsOpen(false)}
                 className="hover:text-yellow-600"
               >
-                Termos
+                Opção Cliente
               </Link>
+            )}
+            {user?.context === 'BACKOFFICE' && (
+              <>
+                <Link
+                  href="/backoffice/terms"
+                  onClick={() => setIsOpen(false)}
+                  className="hover:text-yellow-600"
+                  >
+                  Termos
+                </Link>
+                <Link
+                    href="/backoffice/plans"
+                    onClick={() => setIsOpen(false)}
+                    className="hover:text-yellow-600"
+                    >
+                    Planos
+                </Link>
+                <Link
+                    href="/backoffice/clients"
+                    onClick={() => setIsOpen(false)}
+                    className="hover:text-yellow-600"
+                    >
+                    Clientes
+                </Link>
+              </>
             )}
             <hr />
 
@@ -169,13 +196,6 @@ const handleLogout = () => {
                   className="bg-yellow-400 text-black px-4 py-2 rounded text-sm text-center hover:bg-yellow-300 transition"
                 >
                   Criar conta
-                </Link>
-                <Link
-                  href="/login-backoffice"
-                  onClick={() => setIsOpen(false)}
-                  className="text-sm text-neutral-700 flex items-center gap-1"
-                >
-                  Acesse o BackOffice <ArrowRightIcon className="h-4 w-4" />
                 </Link>
               </>
               

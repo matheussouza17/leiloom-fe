@@ -114,3 +114,75 @@ export async function updateClientUser(
     return Promise.reject({ message: 'Erro ao registrar usuário.' })
   }
 }
+
+
+export interface Client {
+  id?: string
+  name: string
+  cpfCnpj: string
+  cep?: string
+  street?: string
+  number?: string
+  complement?: string
+  neighborhood?: string
+  city?: string
+  state?: string
+  country?: string
+  status: 'PENDING' | 'CONFIRMED' | 'APPROVED' | 'EXCLUDED'
+  confirmationCode?: string
+  isConfirmed: boolean
+  createdOn?: string
+  updatedOn?: string
+}
+
+/**
+ * Lista todos os clientes
+ */
+export async function getAllClients(): Promise<Client[]> {
+  try {
+    const response = await api.get('/clients')
+    return response.data
+  } catch (error: any) {
+    console.error('Erro ao buscar clientes:', error)
+    return Promise.reject({ message: 'Erro ao listar os clientes.' })
+  }
+}
+
+/**
+ * Busca um cliente por ID
+ */
+export async function getClientById(id: string): Promise<Client> {
+  try {
+    const response = await api.get(`/clients/${id}`)
+    return response.data
+  } catch (error: any) {
+    console.error('Erro ao buscar cliente:', error)
+    return Promise.reject({ message: 'Erro ao buscar cliente por ID.' })
+  }
+}
+
+/**
+ * Atualiza os dados de um cliente
+ */
+export async function updateClientAll(id: string, data: Partial<Client>) {
+  try {
+    const response = await api.patch(`/clients/${id}`, data)
+    return response.data
+  } catch (error: any) {
+    console.error('Erro ao atualizar cliente:', error)
+    return Promise.reject({ message: 'Erro ao atualizar cliente.' })
+  }
+}
+
+/**
+ * Altera status do cliente para EXCLUDED
+ */
+export async function excludeClient(id: string) {
+  try {
+    const response = await api.patch(`/clients/${id}`, { status: 'EXCLUDED' })
+    return response.data
+  } catch (error: any) {
+    console.error('Erro ao excluir cliente:', error)
+    return Promise.reject({ message: 'Erro ao excluir cliente.' })
+  }
+}
