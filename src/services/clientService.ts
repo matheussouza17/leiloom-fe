@@ -186,3 +186,20 @@ export async function excludeClient(id: string) {
     return Promise.reject({ message: 'Erro ao excluir cliente.' })
   }
 }
+
+/**
+ * Cria um novo cliente
+ * @param client Dados do cliente a ser criado
+ * @returns Dados do cliente criado
+ */
+export async function createClient(client: Omit<Client, 'id' | 'status' | 'isConfirmed' | 'createdOn' | 'updatedOn'>) {
+  try {
+    const response = await api.post('/clients', {
+      ...client,
+    })
+    return response.data
+  } catch (error: any) {
+    console.error('Erro ao criar cliente:', error)
+    return Promise.reject({ message: 'Erro ao criar cliente.' })
+  }
+}
