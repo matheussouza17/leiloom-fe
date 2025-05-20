@@ -24,7 +24,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
               className="flex items-center gap-1 text-sm text-gray-500 hover:text-gray-700 transition mt-2 md:mt-0"
             >
               <LockClosedIcon className="h-4 w-4" />
-              Acesse o Backoffice
+              Backoffice
             </Link>
           )}
         </div>
