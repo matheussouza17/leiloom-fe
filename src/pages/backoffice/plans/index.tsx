@@ -19,6 +19,7 @@ interface Plan {
   description?: string
   price: number
   durationDays: number
+  numberOfUsers: number
   isTrial: boolean
   isActive: boolean
 }
@@ -81,6 +82,7 @@ function PlansAdminPage({ user }: Props) {
         price: Number(planData.price),
         durationDays: Number(planData.durationDays),
         isTrial: Boolean(planData.isTrial),
+        numberOfUsers: planData.numberOfUsers || 1,
         isActive: Boolean(planData.isActive)
       }
       
@@ -339,6 +341,7 @@ function PlansAdminPage({ user }: Props) {
                         description: data.get('description') as string,
                         price: parseFloat(data.get('price') as string),
                         durationDays: parseInt(data.get('durationDays') as string),
+                        numberOfUsers: parseInt(data.get('numberOfUsers') as string) || 1,
                         isTrial: data.get('isTrial') === 'on',
                         isActive: data.get('isActive') === 'on'
                       }
@@ -405,6 +408,24 @@ function PlansAdminPage({ user }: Props) {
                       />
                       <p className="text-xs text-gray-500 mt-1">
                         Ex: 30 (para 1 mês), 365 (para 1 ano)
+                      </p>
+                    </div>
+
+                    <div>
+                      <label htmlFor="numberOfUsers" className="block text-sm font-medium text-gray-700 mb-1">Quantidade de usuários</label>
+                      <input 
+                        id="numberOfUsers"
+                        name="numberOfUsers" 
+                        type="number"
+                        min="1"
+                        required
+                        placeholder="30"
+                        defaultValue={editingPlan?.numberOfUsers || 1} 
+                        className="w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-yellow-500 focus:border-yellow-500 text-gray-500" 
+                        disabled={isLoading}
+                      />
+                      <p className="text-xs text-gray-500 mt-1">
+                        Quantidade de usuários disponíveis para o plano
                       </p>
                     </div>
                     

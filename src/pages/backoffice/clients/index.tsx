@@ -41,6 +41,12 @@ function ClientsAdminPage() {
   const [isLoading, setIsLoading] = useState(false)
   const [currentPage, setCurrentPage] = useState(1)
   const clientsPerPage = 10
+  const statusMap: Record<Client['status'], { label: string; style: string }> = {
+    PENDING: { label: 'Pendente', style: 'bg-yellow-100 text-yellow-800' },
+    CONFIRMED: { label: 'Confirmado', style: 'bg-blue-100 text-blue-800' },
+    APPROVED: { label: 'Aprovado', style: 'bg-green-100 text-green-800' },
+    EXCLUDED: { label: 'Excluído', style: 'bg-red-100 text-red-800' },
+  }
 
   // modal de criação
   const [isOpenModal, setIsOpenModal] = useState(false)
@@ -225,14 +231,8 @@ function ClientsAdminPage() {
                           {client.state || '-'}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
-                          <span
-                            className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                              client.status === 'EXCLUDED'
-                                ? 'bg-red-100 text-red-800'
-                                : 'bg-green-100 text-green-800'
-                            }`}
-                          >
-                            {client.status}
+                          <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${statusMap[client.status].style}`}>
+                            {statusMap[client.status].label}
                           </span>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">

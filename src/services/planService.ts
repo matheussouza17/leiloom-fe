@@ -5,6 +5,7 @@ export interface Plan {
   name: string
   description?: string
   price: number
+  numberOfUsers: number
   durationDays: number
   isActive: boolean
   isTrial: boolean
