@@ -7,6 +7,8 @@ import * as z from 'zod'
 import { useRegisterClient } from '@/contexts/RegisterClientContext'
 import { acceptTerms, getCurrentTerms } from '@/services/termsService'
 import { toast } from 'react-toastify'
+import InfoTooltip from '@/components/shared/InfoTooltip'
+import PasswordField from '@/components/shared/PasswordField'
 
 const schema = z.object({
   cpfCnpj: z.string().min(11, 'CPF ou CNPJ obrigatório'),
@@ -79,14 +81,30 @@ export default function StepThreeDetails({ onNext }: { onNext: () => void }) {
       </div>
       <hr className="border-t border-gray-300 my-4" />
       <div>
-        <label className="block mb-1 text-sm text-black">Senha</label>
-        <input type="password" {...register('password')} className="w-full border border-gray-300 rounded px-3 py-2 text-black" />
+        <label className="flex items-center gap-2 text-sm font-medium text-gray-700 block mb-1 text-black">
+          Senha
+          <InfoTooltip
+            text={
+              <div className="text-xs space-y-1">
+                <p>A senha deve conter:</p>
+                <ul className="list-disc list-inside pl-2">
+                  <li>Pelo menos <strong>6 caracteres</strong></li>
+                  <li>Ao menos <strong>uma letra maiúscula</strong></li>
+                  <li>Ao menos <strong>uma letra minúscula</strong></li>
+                  <li>Ao menos <strong>um número</strong></li>
+                  <li>Ao menos <strong>um caractere especial</strong> (ex: !@#$%)</li>
+                </ul>
+              </div>
+            }
+          />
+        </label>
+        <PasswordField register={register('password')} error={errors.password} />
         {errors.password && <p className="text-red-500 text-xs mt-1">{errors.password.message}</p>}
       </div>
 
       <div>
         <label className="block mb-1 text-sm text-black">Confirme a Senha</label>
-        <input type="password" {...register('confirmPassword')} className="w-full border border-gray-300 rounded px-3 py-2 text-black" />
+        <PasswordField register={register('confirmPassword')} error={errors.confirmPassword} />
         {errors.confirmPassword && <p className="text-red-500 text-xs mt-1">{errors.confirmPassword.message}</p>}
       </div>
 

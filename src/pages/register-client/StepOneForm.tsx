@@ -6,6 +6,7 @@ import * as z from 'zod'
 import { useRegisterClient } from '@/contexts/RegisterClientContext'
 import { registerClient, registerClientUser } from '@/services/clientService'
 import { toast } from 'react-toastify'
+import { useState } from 'react'
 
 const schema = z.object({
   companyName: z.string().min(3, 'Nome obrigatório'),
@@ -19,9 +20,11 @@ export default function StepOneForm({ onNext }: { onNext: () => void }) {
   const { register, handleSubmit, formState: { errors } } = useForm<FormData>({
     resolver: zodResolver(schema)
   })
+  const [isLoading, setIsLoading] = useState(false)
 
   async function onSubmit(data: FormData) {
     try {
+      setIsLoading(true)
       const client = await registerClient(data.companyName, '')
       const clientUser = await registerClientUser(client.id, data.companyName, data.email, '', '', '')
 
@@ -31,10 +34,13 @@ export default function StepOneForm({ onNext }: { onNext: () => void }) {
         clientId: client.id,
         clientUserId: clientUser.id
       })
-
+      
       onNext()
     } catch (err: any) {
       toast.error(err?.message || 'Erro ao iniciar o cadastro.')
+    }
+    finally {
+      setIsLoading(false)
     }
   }
 
@@ -52,8 +58,17 @@ export default function StepOneForm({ onNext }: { onNext: () => void }) {
         {errors.email && <p className="text-red-500 text-xs">{errors.email.message}</p>}
       </div>
 
-      <button type="submit" className="w-full bg-yellow-400 text-black py-2 rounded hover:bg-yellow-300">
-        Avançar
+      <button
+        type="submit"
+        className="w-full bg-yellow-400 text-black py-2 rounded hover:bg-yellow-300 flex items-center justify-center"
+        disabled={isLoading}
+      >
+        {isLoading ? (
+          <svg className="animate-spin h-5 w-5 mr-2 text-black" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
+          </svg>
+        ) : 'Avançar'}
       </button>
     </form>
   )
