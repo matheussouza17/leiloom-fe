@@ -5,7 +5,7 @@ export default function Hero() {
     <section className="min-h-[80vh] flex items-center justify-center bg-gradient-to-br from-blue-50 to-white px-6 text-center">
       <div className="max-w-3xl">
         <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
-          Aqui vai ser o Hero
+          Leiloom
         </h1>
       </div>
     </section>

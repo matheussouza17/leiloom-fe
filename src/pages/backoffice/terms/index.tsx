@@ -1,18 +1,19 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, Fragment } from 'react'
 import { toast } from 'react-toastify'
-import { getTerms, uploadTerm, updateTerm } from '@/services/termsService'
+import { Dialog, Transition } from '@headlessui/react'
 import MainLayout from '@/layouts/MainLayout'
 import { withBackofficeAuth } from '@/hooks/withBackofficeAuth'
 import { TokenPayload } from '@/utils/jwtUtils'
-import { Dialog, Transition } from '@headlessui/react'
-import { Fragment } from 'react'
-import Pagination from '@/components/shared/Pagination'
+import { PageHeader } from '@/components/shared/PageHeader'
+import { DataTable } from '@/components/shared/DataTable'
+import { StatusBadge } from '@/components/shared/StatusBadge'
+import { ActionButton } from '@/components/shared/ActionButton'
+import { ConfirmationModal } from '@/components/shared/ConfirmationModal'
+import { usePagedData } from '@/hooks/usePagedData'
+import { getTerms, uploadTerm, updateTerm } from '@/services/termsService'
 
-/**
- * Interface para o objeto de termo
- */
 interface Term {
   id: string
   fileUrl: string
@@ -25,95 +26,79 @@ interface Props {
   user: TokenPayload
 }
 
-/**
- * Página de administração de termos de uso protegida por autenticação
- */
 function TermsAdminPage({ user }: Props) {
   const [terms, setTerms] = useState<Term[]>([])
   const [editingTerm, setEditingTerm] = useState<Term | null>(null)
-  const [isLoading, setIsLoading] = useState<boolean>(false)
-  const [isOpenModal, setIsOpenModal] = useState<boolean>(false)
+  const [isLoading, setIsLoading] = useState(false)
+  const [isOpenModal, setIsOpenModal] = useState(false)
   const [currentAction, setCurrentAction] = useState<'create' | 'edit'>('create')
-  const [currentPage, setCurrentPage] = useState(1)
-  const termsPerPage = 10
+  const { currentPage, totalPages, paginatedData, goToPage, resetToFirstPage } = usePagedData(terms, 10)
 
-  /**
-   * Carrega a lista de termos do servidor
-   */
   async function loadTerms() {
+    setIsLoading(true)
     try {
-      setIsLoading(true)
       const data = await getTerms()
       setTerms(data)
-    } catch (err) {
-      console.error('Erro ao carregar termos:', err)
+      resetToFirstPage()
+    } catch {
       toast.error('Erro ao carregar os termos de uso')
     } finally {
       setIsLoading(false)
     }
   }
 
-    const totalPages = Math.ceil(terms.length / termsPerPage)
-    const paginatedTerms = terms.slice(
-    (currentPage - 1) * termsPerPage,
-      currentPage * termsPerPage
-  )
+  useEffect(() => { loadTerms() }, [])
 
-  useEffect(() => {
-    loadTerms()
-  }, [])
-
-  /**
-   * Trata o salvamento ou atualização de um termo
-   * @param termData Dados do termo a ser salvo
-   */
-  async function handleSave(termData: Partial<Term>) {
-    try {
-      setIsLoading(true)
-      
-      // Adicionando o ID do usuário logado nos dados
-      const termWithUser = {
-        ...termData,
-        uploadedById: user.sub // Usando o ID do usuário atual
-      }
-      
-      if (editingTerm) {
-        await updateTerm(editingTerm.id, termWithUser)
-        toast.success('Termo atualizado com sucesso!')
-      } else {
-        await uploadTerm(termWithUser)
-        toast.success('Novo termo criado com sucesso!')
-      }
-      
-      setEditingTerm(null)
-      setIsOpenModal(false)
-      loadTerms()
-    } catch (err) {
-      console.error('Erro ao salvar termo:', err)
-      toast.error('Erro ao salvar o termo de uso. Tente novamente.')
-    } finally {
-      setIsLoading(false)
-    }
-  }
-
-  /**
-   * Abre o modal para criar um novo termo
-   */
   function handleNewTerm() {
     setEditingTerm(null)
     setCurrentAction('create')
     setIsOpenModal(true)
   }
 
-  /**
-   * Abre o modal para editar um termo existente
-   */
   function handleEditTerm(term: Term) {
     setEditingTerm(term)
     setCurrentAction('edit')
     setIsOpenModal(true)
   }
 
+  async function handleSave(data: Omit<Term, 'id' | 'uploadedById'>) {
+    setIsLoading(true)
+    const payload = { ...data, uploadedById: user.sub }
+    try {
+      if (editingTerm) {
+        await updateTerm(editingTerm.id, payload)
+        toast.success('Termo atualizado com sucesso!')
+      } else {
+        await uploadTerm(payload)
+        toast.success('Novo termo criado com sucesso!')
+      }
+      setIsOpenModal(false)
+      loadTerms()
+    } catch {
+      toast.error('Erro ao salvar o termo de uso. Tente novamente.')
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  const columns = [
+    { key: 'description', header: 'Descrição' },
+    { key: 'fileUrl', header: 'Link', render: (url: string) => (
+      <a href={url} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline flex items-center gap-1">
+        <span>Visualizar</span>
+        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="currentColor" viewBox="0 0 16 16">
+          <path fillRule="evenodd" d="M8.636 3.5a.5.5 0 0 0-.5-.5H1.5A1.5 1.5 0 0 0 0 4.5v10A1.5 1.5 0 0 0 1.5 16h10a1.5 1.5 0 0 0 1.5-1.5V7.864a.5.5 0 0 0-1 0V14.5a.5.5 0 0 1-.5.5h-10a.5.5 0 0 1-.5-.5v-10a.5.5 0 0 1 .5-.5h6.636a.5.5 0 0 0 .5-.5z"/>
+          <path fillRule="evenodd" d="M16 .5a.5.5 0 0 0-.5-.5h-5a.5.5 0 0 0 0 1h3.793L6.146 9.146a.5.5 0 1 0 .708.708L15 1.707V5.5a.5.5 0 0 0 1 0v-5z"/>
+        </svg>
+      </a>
+    )},
+    { key: 'isCurrent', header: 'Atual', render: (cur: boolean) => (
+      cur ? <StatusBadge variant="success">Ativo</StatusBadge> : null
+    )},
+    { key: 'actions', header: 'Ações', render: (_: any, term: Term) => (
+      <ActionButton variant="edit" onClick={() => handleEditTerm(term)} disabled={isLoading} />
+    )}
+  ]
   /**
    * Fecha o modal
    */
@@ -125,107 +110,32 @@ function TermsAdminPage({ user }: Props) {
     <MainLayout>
       <div className="min-h-screen flex justify-center bg-gray-50">
       <div className="mx-auto py-4 px-4 w-full max-w-none">
-        <div className="flex justify-between items-center mb-8">
-          <h1 className="text-2xl font-bold text-gray-500 ">Gerenciamento de Termos de Uso</h1>
-          <button 
-            onClick={handleNewTerm} 
-            className="bg-yellow-400 text-black font-medium px-5 py-2 rounded-md hover:bg-yellow-500 transition-colors disabled:opacity-50 flex items-center gap-2"
-            disabled={isLoading}
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-              <path d="M8 2a.5.5 0 0 1 .5.5v5h5a.5.5 0 0 1 0 1h-5v5a.5.5 0 0 1-1 0v-5h-5a.5.5 0 0 1 0-1h5v-5A.5.5 0 0 1 8 2Z"/>
-            </svg>
-            Novo Termo
-          </button>
-        </div>
-        
+        <PageHeader 
+          title="Gerenciamento de Termos de Uso"
+          buttonText="Novo Termo"
+          onButtonClick={handleNewTerm}
+          isLoading={isLoading}
+        />
         <div className="bg-white rounded-lg shadow-md overflow-hidden">
-          <div className="border-b px-6 py-4">
-            <p className="text-sm text-gray-500">
-              Gerencie os termos de uso da plataforma. O termo marcado como atual será exibido para os usuários.
-            </p>
-          </div>
-          {isLoading && !terms.length ? (
-            <div className="py-12 text-center">
-              <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-yellow-400"></div>
-              <p className="mt-2 text-gray-500">Carregando termos...</p>
+            <div className="border-b px-6 py-4">
+              <p className="text-sm text-gray-500">
+                Gerencie os termos de uso da plataforma. O termo marcado como atual será exibido para os usuários.
+              </p>
             </div>
-          ) : terms.length > 0 ? (
-            <div className="overflow-x-auto">
-              <table className="w-full min-w-[600px]">
-                <thead>
-                  <tr className="bg-gray-50">
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Descrição</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Link</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Atual</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ações</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-200">
-                  {paginatedTerms.map((term) => (
-                    <tr key={term.id} className="hover:bg-gray-50">
-                      <td className="px-6 py-4 whitespace-nowrap text-gray-500 ">{term.description}</td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <a 
-                          href={term.fileUrl} 
-                          target="_blank" 
-                          rel="noopener noreferrer"
-                          className="text-blue-600 hover:text-blue-800 hover:underline flex items-center gap-1"
-                        >
-                          <span>Visualizar</span>
-                          <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="currentColor" viewBox="0 0 16 16">
-                            <path fillRule="evenodd" d="M8.636 3.5a.5.5 0 0 0-.5-.5H1.5A1.5 1.5 0 0 0 0 4.5v10A1.5 1.5 0 0 0 1.5 16h10a1.5 1.5 0 0 0 1.5-1.5V7.864a.5.5 0 0 0-1 0V14.5a.5.5 0 0 1-.5.5h-10a.5.5 0 0 1-.5-.5v-10a.5.5 0 0 1 .5-.5h6.636a.5.5 0 0 0 .5-.5z"/>
-                            <path fillRule="evenodd" d="M16 .5a.5.5 0 0 0-.5-.5h-5a.5.5 0 0 0 0 1h3.793L6.146 9.146a.5.5 0 1 0 .708.708L15 1.707V5.5a.5.5 0 0 0 1 0v-5z"/>
-                          </svg>
-                        </a>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        {term.isCurrent ? (
-                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                            Ativo
-                          </span>
-                        ) : ''}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <button
-                          onClick={() => handleEditTerm(term)}
-                          className="text-yellow-500 hover:text-yellow-700 font-medium hover:underline disabled:opacity-50 flex items-center gap-1"
-                          disabled={isLoading}
-                        >
-                          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16">
-                            <path d="M12.146.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1 0 .708l-10 10a.5.5 0 0 1-.168.11l-5 2a.5.5 0 0 1-.65-.65l2-5a.5.5 0 0 1 .11-.168l10-10zM11.207 2.5 13.5 4.793 14.793 3.5 12.5 1.207 11.207 2.5zm1.586 3L10.5 3.207 4 9.707V10h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.293l6.5-6.5zm-9.761 5.175-.106.106-1.528 3.821 3.821-1.528.106-.106A.5.5 0 0 1 5 12.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.468-.325z"/>
-                          </svg>
-                          <span>Editar</span>
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-              <Pagination
-                currentPage={currentPage}
-                totalPages={totalPages}
-                onPageChange={(p) => {
-                  if (p >= 1 && p <= totalPages) setCurrentPage(p)
-                }}
-              />
-            </div>
-            
-          ) : (
-            <div className="py-12 text-center text-gray-500">
-              <svg xmlns="http://www.w3.org/2000/svg" className="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-              </svg>
-              <p className="mt-2">Nenhum termo de uso cadastrado.</p>
-              <button 
-                onClick={handleNewTerm}
-                className="mt-4 inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-yellow-700 bg-yellow-100 hover:bg-yellow-200"
-              >
-                Criar o primeiro termo
-              </button>
-            </div>
-          )}
+            <DataTable
+              data={paginatedData}
+              columns={columns}
+              currentPage={currentPage}
+              totalPages={totalPages}
+              itemsPerPage={10}
+              onPageChange={goToPage}
+              isLoading={isLoading}
+              emptyStateTitle="Nenhum termo de uso cadastrado."
+              onCreateFirst={handleNewTerm}
+              createFirstText="Criar o primeiro termo"
+          />
         </div>
+
       </div>
 
       {/* Modal para adicionar/editar termos */}

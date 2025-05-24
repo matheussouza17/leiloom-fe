@@ -9,6 +9,7 @@ import { useRouter } from 'next/navigation'
 import { loginClient } from '@/services/authService'
 import MainLayout from '@/layouts/MainLayout'
 import { useAuthContext } from '@/contexts/AuthContext'
+import PasswordField from '@/components/shared/PasswordField'
 
 const schema = z.object({
   personType: z.enum(['PF', 'PJ']),
@@ -155,7 +156,7 @@ export default function LoginPage() {
                     <input
                       type="text"
                       {...register('cnpj')}
-                      className="w-full border border-gray-300 rounded-lg px-3 py-2 text-black focus:ring-2 focus:ring-yellow-400 focus:border-transparent outline-none transition-all"
+                      className="w-full border border-gray-300 rounded px-3 py-2 text-black focus:ring-2 focus:ring-yellow-400 focus:border-transparent outline-none transition-all"
                     />
                   </div>
 
@@ -202,7 +203,7 @@ export default function LoginPage() {
                   <input
                     type="text"
                     {...register('login')}
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-black focus:ring-2 focus:ring-yellow-400 focus:border-transparent outline-none transition-all"
+                    className="w-full border border-gray-300 rounded px-3 py-2 text-black focus:ring-2 focus:ring-yellow-400 focus:border-transparent outline-none transition-all"
                   />
                   {errors.login && <p className="text-red-500 text-xs mt-1">{errors.login.message}</p>}
                 </div>
@@ -210,11 +211,7 @@ export default function LoginPage() {
 
               <div>
                 <label className="block text-sm text-black font-medium mb-1">Senha</label>
-                <input
-                  type="password"
-                  {...register('password')}
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-black focus:ring-2 focus:ring-yellow-400 focus:border-transparent outline-none transition-all"
-                />
+                <PasswordField register={register('password')} error={errors.password} />
                 {errors.password && <p className="text-red-500 text-xs mt-1">{errors.password.message}</p>}
               </div>
 

@@ -11,7 +11,6 @@ function DashboardClient({ user }: Props) {
     <MainLayout>
       <section className="py-16 px-4 max-w-4xl mx-auto">
       <h1 className="text-2xl font-bold">Dashboard do Cliente</h1>
-      <p>User Logado: {user.email}</p>
       </section>
     </MainLayout>
   )

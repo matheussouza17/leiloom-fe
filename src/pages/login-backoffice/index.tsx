@@ -9,6 +9,7 @@ import { useRouter } from 'next/navigation'
 import { loginBackOffice } from '@/services/authService' 
 import MainLayout from '@/layouts/MainLayout'
 import { useAuthContext } from '@/contexts/AuthContext'
+import PasswordField from '@/components/shared/PasswordField'
 
 const schema = z.object({
   login: z.string().min(3, 'Informe usuário ou e-mail'),
@@ -69,11 +70,7 @@ export default function BackOfficeLoginPage() {
 
             <div>
               <label className="block text-sm text-black font-medium mb-1">Senha</label>
-              <input
-                type="password"
-                {...register('password')}
-                className="w-full border rounded px-3 py-2 text-black focus:ring-2 focus:ring-yellow-400 outline-none"
-              />
+              <PasswordField register={register('password')} error={errors.password} />
               {errors.password && <p className="text-red-500 text-xs mt-1">{errors.password.message}</p>}
             </div>
 

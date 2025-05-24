@@ -7,7 +7,7 @@ import * as z from 'zod'
 import { useRegisterClient } from '@/contexts/RegisterClientContext'
 import { acceptTerms, getCurrentTerms } from '@/services/termsService'
 import { toast } from 'react-toastify'
-import InfoTooltip from '@/components/shared/InfoTooltip'
+import InfoTooltip from '@/components/shared/InfoToolTip'
 import PasswordField from '@/components/shared/PasswordField'
 
 const schema = z.object({

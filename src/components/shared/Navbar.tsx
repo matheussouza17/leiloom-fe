@@ -80,7 +80,7 @@ const handleLogout = () => {
                 className="flex items-center text-white hover:text-yellow-400 transition text-[12px]"
               >
                 <UserCircleIcon className="h-5 w-5 mr-1" />
-                Olá, {user?.email.split('@')[0]}
+                Olá, {user?.name}
               </Link>
               <button
                 onClick={handleLogout}
