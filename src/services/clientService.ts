@@ -1,5 +1,6 @@
 import { Id } from 'react-toastify'
 import { api } from './api'
+import Client from '@/services/Interfaces' 
 
 /**
  * Cadastra um novo cliente
@@ -113,26 +114,6 @@ export async function updateClientUser(
     console.error('Error updating client user:', error)
     return Promise.reject({ message: 'Erro ao registrar usuário.' })
   }
-}
-
-
-export interface Client {
-  id?: string
-  name: string
-  cpfCnpj: string
-  cep?: string
-  street?: string
-  number?: string
-  complement?: string
-  neighborhood?: string
-  city?: string
-  state?: string
-  country?: string
-  status: 'PENDING' | 'CONFIRMED' | 'APPROVED' | 'EXCLUDED'
-  confirmationCode?: string
-  isConfirmed: boolean
-  createdOn?: string
-  updatedOn?: string
 }
 
 /**

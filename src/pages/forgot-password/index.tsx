@@ -4,7 +4,7 @@ import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { toast } from 'react-toastify'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { forgotPassword } from '@/services/authService'
 import MainLayout from '@/layouts/MainLayout'
 
@@ -25,7 +25,7 @@ export default function ForgotPasswordPage() {
   async function onSubmit(data: FormData) {
     setLoading(true)
     try {
-      await forgotPassword({ email: data.email, context: 'CLIENT' }) // ou BACKOFFICE se for o caso
+      await forgotPassword({ email: data.email, context: 'CLIENT' }) 
       toast.success('Se houver uma conta com esse e-mail, enviamos as instruções.')
     } catch (err: any) {
       toast.error(err?.message || 'Erro ao solicitar redefinição de senha.')
@@ -33,6 +33,13 @@ export default function ForgotPasswordPage() {
       setLoading(false)
     }
   }
+
+  useEffect(() => {
+    if (typeof window !== 'undefined' && (localStorage.getItem('backofficeToken')||localStorage.getItem('clientToken'))) {
+      localStorage.removeItem('clientToken')
+      localStorage.removeItem('backofficeToken')
+    }
+  }, [])
 
   return (
     <MainLayout>

@@ -48,6 +48,13 @@ export default function LoginPage() {
     setValue('personType', personType)
   }, [personType, setValue])
 
+   useEffect(() => {
+    if (typeof window !== 'undefined' && (localStorage.getItem('backofficeToken')||localStorage.getItem('clientToken'))) {
+      localStorage.removeItem('clientToken')
+      localStorage.removeItem('backofficeToken')
+    }
+  }, [])
+
   const cnpjValue = watch('cnpj')
   
   useEffect(() => {

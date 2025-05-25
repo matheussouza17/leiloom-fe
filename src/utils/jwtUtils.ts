@@ -18,7 +18,6 @@ export interface TokenPayload {
           .replace(/-/g, '+')
           .replace(/_/g, '/')
       )
-      console.log('Decoded JWT Payload:', json)
       return JSON.parse(json) as TokenPayload
     } catch (err) {
       return null

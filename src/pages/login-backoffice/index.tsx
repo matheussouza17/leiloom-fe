@@ -3,7 +3,7 @@
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import * as z from 'zod'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { toast } from 'react-toastify'
 import { useRouter } from 'next/navigation'
 import { loginBackOffice } from '@/services/authService' 
@@ -26,6 +26,13 @@ export default function BackOfficeLoginPage() {
     resolver: zodResolver(schema),
     defaultValues: { login: '', password: '' }
   })
+
+   useEffect(() => {
+      if (typeof window !== 'undefined' && (localStorage.getItem('backofficeToken')||localStorage.getItem('clientToken'))) {
+        localStorage.removeItem('clientToken')
+        localStorage.removeItem('backofficeToken')
+      }
+    }, [])
 
   async function onSubmit(data: FormData) {
     setLoading(true)
