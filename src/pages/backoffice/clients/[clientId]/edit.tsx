@@ -28,7 +28,18 @@ function ClientEditPage() {
   const [client, setClient] = useState<Client | null>(null)
   const [users, setUsers] = useState<ClientUser[]>([])
   const [isLoading, setIsLoading] = useState(false)
-
+  const statusMap: Record<Client['status'], { label: string; variant: 'success' | 'warning' | 'error' | 'info' }> = {
+    PENDING: { label: 'Pendente', variant: 'warning' },
+    CONFIRMED: { label: 'Confirmado', variant: 'info' },
+    APPROVED: { label: 'Aprovado', variant: 'success' },
+    EXCLUDED: { label: 'Excluído', variant: 'error' },
+  }
+  const roleMap: Record<Client['role'], { label: string; variant: 'success' | 'warning' | 'error' | 'info' }> = {
+    ClientOwner: { label: 'Admin', variant: 'warning' },
+    ClientAdmin: { label: 'Financeiro', variant: 'info' },
+    ClientFinancial: { label: 'Financeiro', variant: 'success' },
+    ClientOperator: { label: 'Operador', variant: 'error' },
+  }
   const [isUserModalOpen, setIsUserModalOpen] = useState(false)
   const [userAction, setUserAction] = useState<'create' | 'edit'>('create')
   const [editingUser, setEditingUser] = useState<ClientUser | null>(null)
@@ -38,25 +49,28 @@ function ClientEditPage() {
   const { currentPage, totalPages, paginatedData, goToPage, resetToFirstPage } =
     usePagedData(users, 10)
 
-
   const columns = [
               { key: 'name', header: 'Nome' },
               { key: 'email', header: 'Email' },
               { key: 'phone', header: 'Telefone' },
               { key: 'cpfCnpj', header: 'CPF/CNPJ' },
-              { key: 'role', header: 'Função' },
+              { key: 'role', header: 'Função',
+                 render: (role: Client['role']) => (
+                    roleMap[role].label
+                  )
+               },
               {
-                key: 'status', header: 'Situação', render: (s: string) => (
-                  <StatusBadge variant={
-                    s === 'APPROVED' ? 'success' : s === 'PENDING' ? 'warning' : s === 'CONFIRMED' ? 'info' : 'error'
-                  }>{s}</StatusBadge>
-                )
+                key: 'status', header: 'Situação', 
+                 render: (status: Client['status']) => (
+                    <StatusBadge variant={statusMap[status].variant}>
+                      {statusMap[status].label}
+                    </StatusBadge>
+                  )
               },
               {
                 key: 'actions', header: 'Ações', render: (_: any, u: ClientUser) => (
                   <div className="flex space-x-2">
                     <ActionButton variant="edit" onClick={() => { setUserAction('edit'); setEditingUser(u); setIsUserModalOpen(true) }} disabled={isLoading} />
-                    <ActionButton variant="delete" onClick={() => { setUserToDelete(u); setIsDeleteModalOpen(true) }} disabled={isLoading} />
                   </div>
                 )
               }
@@ -233,10 +247,10 @@ async function loadAll() {
                   className="border p-2 rounded text-gray-500"
                   disabled={isLoading}
                 >
-                  <option value="PENDING">PENDING</option>
-                  <option value="CONFIRMED">CONFIRMED</option>
-                  <option value="APPROVED">APPROVED</option>
-                  <option value="EXCLUDED">EXCLUDED</option>
+                  <option value="PENDING">Pendente</option>
+                  <option value="CONFIRMED">Confirmado</option>
+                  <option value="APPROVED">Aprovado</option>
+                  <option value="EXCLUDED">Excluído</option>
                 </select>
               </div>
               <div className="flex items-center">
@@ -316,10 +330,10 @@ async function loadAll() {
                       <div>
                         <label htmlFor="role" className="block text-sm font-medium text-gray-700">Função</label>
                         <select id="role" name="role" defaultValue={editingUser?.role} className="text-gray-500 w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-yellow-500 focus:border-yellow-500 text-gray-500" disabled={isLoading}>
-                          <option>ClientOwner</option>
-                          <option>ClientAdmin</option>
-                          <option>ClientFinancial</option>
-                          <option>ClientOperator</option>
+                          <option value="ClientOwner">Owner</option>
+                          <option value="ClientAdmin">Admin</option>
+                          <option value="ClientFinancial">Financeiro</option>
+                          <option value="ClientOperator">Operador</option>
                         </select>
                       </div>
                       {userAction === 'edit' && (
@@ -327,20 +341,16 @@ async function loadAll() {
                           <div>
                             <label htmlFor="status" className="block text-sm font-medium text-gray-700">Situação</label>
                             <select id="status" name="status" defaultValue={editingUser?.status} className="text-gray-500 w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-yellow-500 focus:border-yellow-500 text-gray-500" disabled={isLoading}>
-                              <option>PENDING</option>
-                              <option>CONFIRMED</option>
-                              <option>APPROVED</option>
-                              <option>EXCLUDED</option>
+                              <option value="PENDING">Pendente</option>
+                              <option value="CONFIRMED">Confirmado</option>
+                              <option value="APPROVED">Aprovado</option>
+                              <option value="EXCLUDED">Excluído</option>
                             </select>
-                          </div>
-                          <div className="flex items-center">
-                            <input id="isConfirmed" name="isConfirmed" type="checkbox" defaultChecked={editingUser?.isConfirmed} disabled={isLoading} className="mr-2"/>
-                            <label htmlFor="isConfirmed" className="text-sm text-gray-700">Confirmado</label>
                           </div>
                         </>
                       )}
                       <div className="flex justify-end space-x-2">
-                        <button type="button" onClick={() => setIsUserModalOpen(false)} className="px-4 py-2 border rounded">Cancelar</button>
+                        <button type="button" onClick={() => setIsUserModalOpen(false)} className="px-4 py-2 border rounded text-gray-500">Cancelar</button>
                         <button type="submit" disabled={isLoading} className="px-4 py-2 bg-yellow-400 rounded text-black">{userAction === 'create' ? 'Adicionar' : 'Atualizar'}</button>
                       </div>
                     </form>

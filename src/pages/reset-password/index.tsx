@@ -8,6 +8,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { toast } from 'react-toastify'
 import { resetPassword, validateResetToken } from '@/services/authService'
 import MainLayout from '@/layouts/MainLayout'
+import PasswordField from '@/components/shared/PasswordField'
 
 const schema = z.object({
   code: z.string().min(4, 'Código obrigatório'),
@@ -56,6 +57,13 @@ export default function ResetPasswordPage() {
   
     validar()
   }, [token])
+
+  useEffect(() => {
+    if (typeof window !== 'undefined' && (localStorage.getItem('backofficeToken')||localStorage.getItem('clientToken'))) {
+      localStorage.removeItem('clientToken')
+      localStorage.removeItem('backofficeToken')
+    }
+  }, [])
   
 
   async function onSubmit(data: FormData) {
@@ -102,14 +110,12 @@ export default function ResetPasswordPage() {
 
             <div>
               <label className="block text-sm text-black">Nova Senha</label>
-              <input type="password" {...register('newPassword')} className="w-full border px-3 py-2 rounded text-black" />
-              {errors.newPassword && <p className="text-red-500 text-xs">{errors.newPassword.message}</p>}
+              <PasswordField register={register('newPassword')} error={errors.newPassword} />
             </div>
 
             <div>
               <label className="block text-sm text-black">Confirme a nova senha</label>
-              <input type="password" {...register('confirmPassword')} className="w-full border px-3 py-2 rounded text-black" />
-              {errors.confirmPassword && <p className="text-red-500 text-xs">{errors.confirmPassword.message}</p>}
+              <PasswordField register={register('confirmPassword')} error={errors.confirmPassword} />
             </div>
 
             <button

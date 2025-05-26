@@ -17,25 +17,7 @@ import {
   createClient,
   updateClientAll,
 } from '@/services/clientService'
-
-interface Client {
-  id?: string
-  name: string
-  cpfCnpj: string
-  cep?: string
-  street?: string
-  number?: string
-  complement?: string
-  neighborhood?: string
-  city?: string
-  state?: string
-  country?: string
-  status: 'PENDING' | 'CONFIRMED' | 'APPROVED' | 'EXCLUDED'
-  confirmationCode?: string
-  isConfirmed: boolean
-  createdOn?: string
-  updatedOn?: string
-}
+import Client from '@/services/Interfaces'
 
 function ClientsAdminPage() {
   const router = useRouter()
@@ -52,19 +34,27 @@ function ClientsAdminPage() {
 
   const [isOpenModal, setIsOpenModal] = useState(false)
   const [newClient, setNewClient] = useState<Client>({
-    name: '',
-    cpfCnpj: '',
-    cep: '',
-    street: '',
-    number: '',
-    complement: '',
-    neighborhood: '',
-    city: '',
-    state: '',
-    country: '',
-    status: 'PENDING',
-    confirmationCode: '',
-    isConfirmed: false,
+  clientId:   '',
+  name:       '',
+  email:      '',
+  phone:      '',
+  role:       'ClientOwner',
+  id:              undefined,
+  cpfCnpj:         '',
+  cep:             '',
+  street:          '',
+  number:          '',
+  complement:      '',
+  neighborhood:    '',
+  city:            '',
+  state:           '',
+  country:         'Brasil',
+  status:          'PENDING',
+  confirmationCode:'',
+  isConfirmed:     false,
+  createdOn:       undefined,
+  updatedOn:       undefined,
+  clientUsers:     undefined,
   })
 
   const [isExcludeModalOpen, setIsExcludeModalOpen] = useState(false)
@@ -125,19 +115,27 @@ function ClientsAdminPage() {
 
   function handleNewClient() {
     setNewClient({
-      name: '',
-      cpfCnpj: '',
-      cep: '',
-      street: '',
-      number: '',
-      complement: '',
-      neighborhood: '',
-      city: '',
-      state: '',
-      country: '',
-      status: 'PENDING',
-      confirmationCode: '',
-      isConfirmed: false,
+  clientId:   '',
+  name:       '',
+  email:      '',
+  phone:      '',
+  role:       'ClientOwner',
+  id:              undefined,
+  cpfCnpj:         '',
+  cep:             '',
+  street:          '',
+  number:          '',
+  complement:      '',
+  neighborhood:    '',
+  city:            '',
+  state:           '',
+  country:         '',
+  status:          'PENDING',
+  confirmationCode:'',
+  isConfirmed:     false,
+  createdOn:       undefined,
+  updatedOn:       undefined,
+  clientUsers:     undefined,
     })
     setIsOpenModal(true)
   }
