@@ -1,6 +1,7 @@
 import { Id } from 'react-toastify'
 import { api } from './api'
 import Client from '@/services/Interfaces' 
+import ClientReduced from '@/services/Interfaces' 
 
 /**
  * Cadastra um novo cliente
@@ -147,7 +148,23 @@ export async function getClientById(id: string): Promise<Client> {
  */
 export async function updateClientAll(id: string, data: Partial<Client>) {
   try {
-    const response = await api.patch(`/clients/${id}`, data)
+    const dataToUpdate: Partial<ClientReduced> = {
+      name: data.name,
+      cpfCnpj: data.cpfCnpj,
+      cep: data.cep,
+      street: data.street,
+      number: data.number,
+      complement: data.complement,
+      neighborhood: data.neighborhood,
+      city: data.city,
+      state: data.state,
+      country: data.country,
+      status: data.status,
+      confirmationCode: data.confirmationCode,
+      isConfirmed: data.isConfirmed,
+      updatedOn: new Date().toISOString(),
+    }
+    const response = await api.patch(`/clients/${id}`, dataToUpdate)
     return response.data
   } catch (error: any) {
     console.error('Erro ao atualizar cliente:', error)
