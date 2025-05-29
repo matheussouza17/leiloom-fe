@@ -6,7 +6,7 @@ interface Country {
 
 export async function getCountriesFromExternal(): Promise<Country[]> {
   try {
-    const response = await fetch('https://restcountries.com/v3.1/all?fields=name,cca2', {
+    const response = await fetch('https://restcountries.com/v3.1/all?fields=name,translations,cca2', {
       method: 'GET',
     })
 
@@ -15,14 +15,16 @@ export async function getCountriesFromExternal(): Promise<Country[]> {
     }
 
     const data = await response.json()
-    
-    // Mapeia os dados da API externa para o formato esperado
+
     const countries: Country[] = data
       .map((country: any) => ({
         code: country.cca2,
-        name: country.name.common
+        name:
+          country.translations?.por?.common ??
+          country.translations?.spa?.common ?? // fallback espanhol
+          country.name?.common ?? 'Desconhecido'
       }))
-      .sort((a: Country, b: Country) => a.name.localeCompare(b.name))
+      .sort((a: Country, b: Country) => a.name.localeCompare(b.name, 'pt'))
 
     return countries
   } catch (error) {

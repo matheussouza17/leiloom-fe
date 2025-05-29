@@ -34,11 +34,6 @@ export function DataTable({
   onCreateFirst,
   createFirstText = "Criar o primeiro item"
 }: DataTableProps) {
-  const paginatedData = data.slice(
-    (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage
-  )
-
   if (isLoading && !data.length) {
     return (
       <div className="py-12 text-center">
@@ -97,7 +92,7 @@ export function DataTable({
           </tr>
         </thead>
         <tbody className="divide-y divide-gray-200">
-          {paginatedData.map((item, index) => (
+          {data.map((item, index) => (
             <tr key={item.id || index} className="hover:bg-gray-50">
               {columns.map((column) => (
                 <td key={column.key} className="px-6 py-4 whitespace-nowrap text-gray-500">

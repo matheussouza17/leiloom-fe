@@ -18,13 +18,27 @@ import {
   updateClientAll,
 } from '@/services/clientService'
 import Client from '@/services/Interfaces'
+import { SearchBar } from '@/components/shared/SearchBar'
+import { MultiSelectDropdown } from '@/components/shared/MultiSelectDropdown'
+import { useDynamicTitle } from '@/hooks/useDynamicTitle'
+
 
 function ClientsAdminPage() {
+  useDynamicTitle()
   const router = useRouter()
   const [clients, setClients] = useState<Client[]>([])
   const [isLoading, setIsLoading] = useState(false)
-  const { currentPage, totalPages, paginatedData, goToPage, resetToFirstPage } = usePagedData(clients, 10)
-  
+  const [search, setSearch] = useState('')
+  const [selectedStatuses, setSelectedStatuses] = useState<Client['status'][]>(['PENDING', 'CONFIRMED', 'APPROVED'])
+  const filtered = clients
+    .filter(client => selectedStatuses.includes(client.status))
+    .filter(client =>
+      client.name.toLowerCase().includes(search.toLowerCase()) ||
+      client.cpfCnpj?.toLowerCase().includes(search.toLowerCase())
+    )
+
+  const { currentPage, totalPages, paginatedData, goToPage, resetToFirstPage } = usePagedData(filtered, 10)
+
   const statusMap: Record<Client['status'], { label: string; variant: 'success' | 'warning' | 'error' | 'info' }> = {
     PENDING: { label: 'Pendente', variant: 'warning' },
     CONFIRMED: { label: 'Confirmado', variant: 'info' },
@@ -58,9 +72,7 @@ function ClientsAdminPage() {
   })
 
   const [isExcludeModalOpen, setIsExcludeModalOpen] = useState(false)
-  const [clientToExclude, setClientToExclude] = useState<Client | null>(null)
 
-  // Configuração das colunas da tabela
   interface Column<T> {
     key: keyof T | string
     header: string
@@ -159,31 +171,10 @@ function ClientsAdminPage() {
     router.push(`/backoffice/clients/${client.id}/edit`)
   }
 
-  function handleExcludeConfirmation(client: Client) {
-    setClientToExclude(client)
-    setIsExcludeModalOpen(true)
-  }
-
-  async function handleExcludeClient() {
-    if (!clientToExclude?.id) return
-    setIsLoading(true)
-    try {
-      await updateClientAll(clientToExclude.id, {
-        ...clientToExclude,
-        status: 'EXCLUDED',
-      })
-      toast.success('Cliente excluído com sucesso!')
-      setIsExcludeModalOpen(false)
-      loadClients()
-    } catch {
-      toast.error('Erro ao excluir cliente.')
-    } finally {
-      setIsLoading(false)
-    }
-  }
 
   return (
     <MainLayout>
+      
       <div className="min-h-screen flex justify-center bg-gray-50">
         <div className="mx-auto py-4 px-4 w-full max-w-none">
           <PageHeader
@@ -199,9 +190,24 @@ function ClientsAdminPage() {
                 Gerencie os clientes cadastrados na plataforma.
               </p>
             </div>
-
+            <div className="flex items-center justify-between p-6 border-b">
+              <SearchBar
+                value={search}
+                onChange={setSearch}
+                placeholder="Pesquisar por nome ou CPF/CNPJ"
+              />
+              <MultiSelectDropdown
+                label="Filtrar por status"
+                options={Object.entries(statusMap).map(([value, meta]) => ({
+                  label: meta.label,
+                  value: value as Client['status']
+                }))}
+                selected={selectedStatuses}
+                onChange={setSelectedStatuses}
+                />
+            </div>
             <DataTable
-              data={clients}
+              data={paginatedData}
               columns={columns}
               currentPage={currentPage}
               totalPages={totalPages}
@@ -537,17 +543,6 @@ function ClientsAdminPage() {
             </div>
           </Dialog>
         </Transition>
-
-        <ConfirmationModal
-          isOpen={isExcludeModalOpen}
-          onClose={() => setIsExcludeModalOpen(false)}
-          onConfirm={handleExcludeClient}
-          title="Confirmar exclusão"
-          message={`Tem certeza que deseja excluir o cliente ${clientToExclude?.name}? Esta ação apenas altera o status para EXCLUDED.`}
-          confirmButtonText="Excluir"
-          isLoading={isLoading}
-          variant="danger"
-        />
       </div>
     </MainLayout>
   )

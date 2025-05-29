@@ -10,6 +10,7 @@ import { PageHeader } from '@/components/shared/PageHeader'
 import { DataTable } from '@/components/shared/DataTable'
 import { StatusBadge } from '@/components/shared/StatusBadge'
 import { ActionButton } from '@/components/shared/ActionButton'
+import { ComboBox } from '@/components/shared/ComboBox'
 import { usePagedData } from '@/hooks/usePagedData'
 import { getClientById, updateClientAll } from '@/services/clientService'
 import {
@@ -20,8 +21,18 @@ import ClientUser from '@/services/Interfaces'
 import Client from '@/services/Interfaces' 
 import { getCountries } from '@/services/countryService'
 import { getCitiesByCountryCode, City } from '@/services/cityService'
-import { Combobox } from '@headlessui/react'
+import { 
+  getAddressByCep, 
+  getStatesByCountryCode, 
+  getCitiesByStateCode, 
+  State 
+} from '@/services/addressService'
+import { BackButton } from '@/components/shared/BackButton'
 
+interface Country {
+  code: string
+  name: string
+}
 
 function ClientEditPage() {
   const router = useRouter()
@@ -44,23 +55,21 @@ function ClientEditPage() {
     ClientFinancial: { label: 'Financeiro', variant: 'success' },
     ClientOperator: { label: 'Operador', variant: 'error' },
   }
-  interface Country {
-  code: string
-  name: string
-  }
 
   const [isUserModalOpen, setIsUserModalOpen] = useState(false)
   const [userAction, setUserAction] = useState<'create' | 'edit'>('create')
   const [editingUser, setEditingUser] = useState<ClientUser | null>(null)
   const [isLoadingCountries, setIsLoadingCountries] = useState(false)
+  const [isLoadingStates, setIsLoadingStates] = useState(false)
+  const [isLoadingCities, setIsLoadingCities] = useState(false)
+  const [isLoadingCep, setIsLoadingCep] = useState(false)
+  
   const [countries, setCountries] = useState<Country[]>([])
+  const [states, setStates] = useState<State[]>([])
   const [cities, setCities] = useState<City[]>([])
-  const [filteredCities, setFilteredCities] = useState<City[]>([])
+  
   const { currentPage, totalPages, paginatedData, goToPage, resetToFirstPage } =
     usePagedData(users, 10)
-
-  const [filteredCountries, setFilteredCountries] = useState<Country[]>([])
-
 
   const columns = [
     { key: 'name', header: 'Nome' },
@@ -109,23 +118,19 @@ function ClientEditPage() {
 
   useEffect(() => {
     if (!client?.country) return
-    const countryObj = countries.find(c => c.name === client.country)
-    if (!countryObj) return
-
-    getCitiesByCountryCode(countryObj.code)
-      .then(data => {
-        setCities(data)
-        setFilteredCities(data)
-      })
-      .catch(() => setCities([]))
+    loadStates()
   }, [client?.country])
+
+  useEffect(() => {
+    if (!client?.state) return
+    loadCities()
+  }, [client?.state])
 
   async function loadCountries() {
     setIsLoadingCountries(true);
     try {
       const countriesData = await getCountries();
       setCountries(countriesData);
-      setFilteredCountries(countriesData);
     } catch (error) {
       console.error('Erro ao carregar países:', error);
       setCountries([
@@ -142,6 +147,76 @@ function ClientEditPage() {
       ]);
     } finally {
       setIsLoadingCountries(false);
+    }
+  }
+
+  async function loadStates() {
+    if (!client?.country) return
+    
+    setIsLoadingStates(true)
+    try {
+      const countryObj = countries.find(c => c.name === client.country)
+      if (countryObj) {
+        const statesData = await getStatesByCountryCode(countryObj.code)
+        setStates(statesData)
+      }
+    } catch (error) {
+      console.error('Erro ao carregar estados:', error)
+      setStates([])
+    } finally {
+      setIsLoadingStates(false)
+    }
+  }
+
+  async function loadCities() {
+    if (!client?.state) return
+    
+    setIsLoadingCities(true)
+    try {
+      const stateObj = states.find(s => s.name === client.state)
+      if (stateObj) {
+        const citiesData = await getCitiesByStateCode(stateObj.code)
+        setCities(citiesData)
+      } else {
+        const countryObj = countries.find(c => c.name === client.country)
+        if (countryObj) {
+          const citiesData = await getCitiesByCountryCode(countryObj.code)
+          setCities(citiesData)
+        }
+      }
+    } catch (error) {
+      console.error('Erro ao carregar cidades:', error)
+      setCities([])
+    } finally {
+      setIsLoadingCities(false)
+    }
+  }
+
+  async function handleCepChange(cep: string) {
+    const cleanCep = cep.replace(/\D/g, '')
+    
+    if (cleanCep.length === 8) {
+      setIsLoadingCep(true)
+      try {
+        const addressData = await getAddressByCep(cleanCep)
+        if (addressData) {
+          setClient(prev => ({
+            ...prev!,
+            cep: cleanCep,
+            street: addressData.logradouro || prev!.street,
+            neighborhood: addressData.bairro || prev!.neighborhood,
+            city: addressData.localidade || prev!.city,
+            state: addressData.uf || prev!.state,
+            complement: addressData.complemento || prev!.complement
+          }))
+          toast.success('Endereço preenchido automaticamente!')
+        }
+      } catch (error) {
+        console.error('Erro ao buscar CEP:', error)
+        toast.error('CEP não encontrado')
+      } finally {
+        setIsLoadingCep(false)
+      }
     }
   }
 
@@ -197,7 +272,7 @@ function ClientEditPage() {
     <MainLayout>
       <div className="min-h-screen bg-gray-50">
         <div className="container mx-auto px-4 py-6 max-w-7xl">
-
+          
           {/* Header da página */}
           <div className="mb-6">
             <PageHeader
@@ -205,6 +280,7 @@ function ClientEditPage() {
               buttonText="Salvar Cliente"
               onButtonClick={() => saveClient(client!)}
               isLoading={isLoading}
+              isDetailsPage={true}
             />
           </div>
 
@@ -243,97 +319,81 @@ function ClientEditPage() {
               <div>
                 <h3 className="text-md font-medium text-gray-900 mb-3">Endereço</h3>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">País</label>
-                    <Combobox value={client.country ?? ''} onChange={(value) => setClient({ ...client, country: value??'' })} disabled={isLoading || isLoadingCountries}>
-                      <div className="relative">
-                        <Combobox.Input
-                          className="w-full border text-gray-700 border-gray-300 rounded-md shadow-sm px-3 py-2 focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 transition-colors"
-                          displayValue={(value: string) => value}
-                          onChange={(e) => {
-                            const query = e.target.value.toLowerCase()
-                            const filtered = countries.filter(c => c.name.toLowerCase().includes(query))
-                            setFilteredCountries(filtered)
-                          }}
-                        />
-                        <Combobox.Options className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black/5 focus:outline-none sm:text-sm">
-                          {(filteredCountries.length > 0 ? filteredCountries : countries).map((country) => (
-                            <Combobox.Option
-                              key={country.code}
-                              value={country.name}
-                              className={({ active }) =>
-                                `relative cursor-default select-none py-2 px-4 ${
-                                  active ? 'bg-yellow-100 text-black' : 'text-gray-900'
-                                }`
-                              }
-                            >
-                              {country.name}
-                            </Combobox.Option>
-                          ))}
-                        </Combobox.Options>
-                      </div>
-                    </Combobox>
-
-                    {isLoadingCountries && (
-                      <p className="text-xs text-gray-500 mt-1">Carregando países...</p>
-                    )}
-                </div>
+                  
+                  {/* País */}
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Cidade</label>
-                  <Combobox
-                    value={client.city ?? ''}
-                    onChange={(value) => setClient({ ...client, city: value??'' })}
-                    disabled={isLoading}
-                  >
-                    <div className="relative">
-                      <Combobox.Input
-                        className="w-full text-gray-700 border border-gray-300 rounded-md shadow-sm px-3 py-2 focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 transition-colors"
-                        displayValue={(value: string) => value}
-                        onChange={(e) => {
-                          const query = e.target.value.toLowerCase()
-                          const filtered = cities.filter(city => city.name.toLowerCase().includes(query))
-                          setFilteredCities(filtered)
-                        }}
-                      />
-                      <Combobox.Options className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black/5 focus:outline-none sm:text-sm">
-                        {(filteredCities.length > 0 ? filteredCities : cities).map((city) => (
-                          <Combobox.Option
-                            key={city.name}
-                            value={city.name}
-                            className={({ active }) =>
-                              `relative cursor-default select-none py-2 px-4 ${
-                                active ? 'bg-yellow-100 text-black' : 'text-gray-900'
-                              }`
-                            }
-                          >
-                            {city.name}
-                          </Combobox.Option>
-                        ))}
-                      </Combobox.Options>
-                    </div>
-                  </Combobox>
-
+                    <label className="block text-sm font-medium text-gray-700 mb-1">País</label>
+                    <ComboBox
+                      value={client.country ?? ''}
+                      onChange={(value) => {
+                        setClient({ ...client, country: value, state: '', city: '' })
+                        setStates([])
+                        setCities([])
+                      }}
+                      options={countries.map(c => ({ value: c.name, label: c.name }))}
+                      placeholder="Digite ou selecione o país"
+                      disabled={isLoading}
+                      isLoading={isLoadingCountries}
+                      allowCustomValue={true}
+                    />
                   </div>
+
+                  {/* CEP */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">CEP</label>
+                    <div className="relative">
+                      <input
+                        type="text"
+                        value={client.cep ?? ''}
+                        onChange={e => {
+                          const value = e.target.value
+                          setClient({ ...client, cep: value })
+                          handleCepChange(value)
+                        }}
+                        className="w-full border text-gray-700 border-gray-300 rounded-md shadow-sm px-3 py-2 focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 transition-colors"
+                        disabled={isLoading}
+                        placeholder="00000-000"
+                      />
+                      {isLoadingCep && (
+                        <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-yellow-500"></div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Estado */}
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">Estado</label>
-                    <input
-                      type="text"
+                    <ComboBox
                       value={client.state ?? ''}
-                      onChange={e => setClient({ ...client, state: e.target.value })}
-                      className="w-full text-gray-700 border border-gray-300 rounded-md shadow-sm px-3 py-2 focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 transition-colors"
-                      disabled={isLoading}
+                      onChange={(value) => {
+                        setClient({ ...client, state: value, city: '' })
+                        setCities([])
+                      }}
+                      options={states.map(s => ({ value: s.name, label: s.name }))}
+                      placeholder="Digite ou selecione o estado"
+                      disabled={isLoading || !client.country}
+                      isLoading={isLoadingStates}
+                      allowCustomValue={true}
                     />
                   </div>
-                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">CEP</label>
-                    <input
-                      type="text"
-                      value={client.cep ?? ''}
-                      onChange={e => setClient({ ...client, cep: e.target.value })}
-                      className="w-full border text-gray-700 border-gray-300 rounded-md shadow-sm px-3 py-2 focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 transition-colors"
-                      disabled={isLoading}
+
+                  {/* Cidade */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Cidade</label>
+                    <ComboBox
+                      value={client.city ?? ''}
+                      onChange={(value) => setClient({ ...client, city: value })}
+                      options={cities.map(c => ({ value: c.name, label: c.name }))}
+                      placeholder="Digite ou selecione a cidade"
+                      disabled={isLoading || !client.country}
+                      isLoading={isLoadingCities}
+                      allowCustomValue={true}
                     />
                   </div>
+
+                  {/* Número */}
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">Número</label>
                     <input
@@ -342,8 +402,11 @@ function ClientEditPage() {
                       onChange={e => setClient({ ...client, number: e.target.value })}
                       className="w-full text-gray-700 border border-gray-300 rounded-md shadow-sm px-3 py-2 focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 transition-colors"
                       disabled={isLoading}
+                      placeholder="15"
                     />
                   </div>
+
+                  {/* Complemento */}
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">Complemento</label>
                     <input
@@ -352,8 +415,11 @@ function ClientEditPage() {
                       onChange={e => setClient({ ...client, complement: e.target.value })}
                       className="w-full text-gray-700 border border-gray-300 rounded-md shadow-sm px-3 py-2 focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 transition-colors"
                       disabled={isLoading}
+                      placeholder="Apto 101, Bloco B, etc."
                     />
                   </div>
+
+                  {/* Bairro */}
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">Bairro</label>
                     <input
@@ -362,8 +428,11 @@ function ClientEditPage() {
                       onChange={e => setClient({ ...client, neighborhood: e.target.value })}
                       className="w-full text-gray-700 border border-gray-300 rounded-md shadow-sm px-3 py-2 focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 transition-colors"
                       disabled={isLoading}
+                      placeholder="Jardim das Flores"
                     />
                   </div>
+
+                  {/* Rua */}
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">Rua</label>
                     <input
@@ -372,6 +441,7 @@ function ClientEditPage() {
                       onChange={e => setClient({ ...client, street: e.target.value })}
                       className="w-full text-gray-700 border border-gray-300 rounded-md shadow-sm px-3 py-2 focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 transition-colors"
                       disabled={isLoading}
+                      placeholder="Rua das Palmeiras"
                     />
                   </div>
                 </div>

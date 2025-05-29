@@ -10,9 +10,9 @@ import { PageHeader } from '@/components/shared/PageHeader'
 import { DataTable } from '@/components/shared/DataTable'
 import { StatusBadge } from '@/components/shared/StatusBadge'
 import { ActionButton } from '@/components/shared/ActionButton'
-import { ConfirmationModal } from '@/components/shared/ConfirmationModal'
 import { usePagedData } from '@/hooks/usePagedData'
 import { getTerms, uploadTerm, updateTerm } from '@/services/termsService'
+import { SearchBar } from '@/components/shared/SearchBar'
 
 interface Term {
   id: string
@@ -32,7 +32,13 @@ function TermsAdminPage({ user }: Props) {
   const [isLoading, setIsLoading] = useState(false)
   const [isOpenModal, setIsOpenModal] = useState(false)
   const [currentAction, setCurrentAction] = useState<'create' | 'edit'>('create')
-  const { currentPage, totalPages, paginatedData, goToPage, resetToFirstPage } = usePagedData(terms, 10)
+  const [search, setSearch] = useState('')
+  const filtered = terms.filter(term =>
+  term.fileUrl.toLowerCase().includes(search.toLowerCase()) ||
+  term.description?.toLowerCase().includes(search.toLowerCase())
+)
+
+  const { currentPage, totalPages, paginatedData, goToPage, resetToFirstPage } = usePagedData(filtered, 10)
 
   async function loadTerms() {
     setIsLoading(true)
@@ -122,6 +128,7 @@ function TermsAdminPage({ user }: Props) {
                 Gerencie os termos de uso da plataforma. O termo marcado como atual será exibido para os usuários.
               </p>
             </div>
+            <SearchBar value={search} onChange={setSearch} />
             <DataTable
               data={paginatedData}
               columns={columns}

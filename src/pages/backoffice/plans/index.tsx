@@ -13,6 +13,7 @@ import { ActionButton } from '@/components/shared/ActionButton'
 import { ConfirmationModal } from '@/components/shared/ConfirmationModal'
 import { usePagedData } from '@/hooks/usePagedData'
 import { getAllPlans, createPlan, updatePlan, deletePlan } from '@/services/planService'
+import { SearchBar } from '@/components/shared/SearchBar'
 
 interface Plan {
   id?: string
@@ -35,9 +36,15 @@ function PlansAdminPage({ user }: Props) {
   const [isLoading, setIsLoading] = useState(false)
   const [isOpenModal, setIsOpenModal] = useState(false)
   const [currentAction, setCurrentAction] = useState<'create' | 'edit'>('create')
-  const { currentPage, totalPages, paginatedData, goToPage, resetToFirstPage } = usePagedData(plans, 10)
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
   const [planToDelete, setPlanToDelete] = useState<Plan | null>(null)
+  const [search, setSearch] = useState('')
+  const filteredPlans = plans.filter(plan =>
+    plan.name.toLowerCase().includes(search.toLowerCase()) ||
+    plan.description?.toLowerCase().includes(search.toLowerCase())
+  )
+  const { currentPage, totalPages, paginatedData, goToPage, resetToFirstPage } = usePagedData(filteredPlans, 10)
+
 
   async function loadPlans() {
     setIsLoading(true)
@@ -151,6 +158,7 @@ function PlansAdminPage({ user }: Props) {
                 Gerencie os planos de assinatura disponíveis na plataforma.
               </p>
             </div>
+            <SearchBar value={search} onChange={setSearch} />
             <DataTable
               data={paginatedData}
               columns={columns}
