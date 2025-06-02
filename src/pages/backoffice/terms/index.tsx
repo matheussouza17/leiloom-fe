@@ -13,6 +13,8 @@ import { ActionButton } from '@/components/shared/ActionButton'
 import { usePagedData } from '@/hooks/usePagedData'
 import { getTerms, uploadTerm, updateTerm } from '@/services/termsService'
 import { SearchBar } from '@/components/shared/SearchBar'
+import { Input } from '@/components/shared/Input'
+import { Button } from '@/components/shared/Button'
 
 interface Term {
   id: string
@@ -197,27 +199,25 @@ function TermsAdminPage({ user }: Props) {
                   >
                     <div>
                       <label htmlFor="fileUrl" className="block text-sm font-medium text-gray-700 mb-1">URL do Arquivo</label>
-                      <input 
+                      <Input 
                         id="fileUrl"
                         name="fileUrl" 
                         type="url"
                         required
                         placeholder="https://exemplo.com/termos.pdf"
                         defaultValue={editingTerm?.fileUrl || ''} 
-                        className="w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-yellow-500 focus:border-yellow-500 text-gray-500" 
                         disabled={isLoading}
                       />
                     </div>
                     
                     <div>
                       <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-1">Descrição</label>
-                      <input 
+                      <Input 
                         id="description"
                         name="description" 
                         required
                         placeholder="Ex: Termos de Uso v1.0"
                         defaultValue={editingTerm?.description || ''} 
-                        className="w-full border border-gray-300 rounded-md shadow-sm p-2 text-gray-500 focus:ring-yellow-500 focus:border-yellow-500" 
                         disabled={isLoading}
                       />
                     </div>
@@ -240,17 +240,17 @@ function TermsAdminPage({ user }: Props) {
                     </div>
                     
                     <div className="flex justify-end gap-3 pt-4">
-                      <button
+                      <Button
                         type="button"
-                        className="inline-flex justify-center rounded-md border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500 disabled:opacity-50"
                         onClick={closeModal}
                         disabled={isLoading}
+                        variant='neutral'
                       >
                         Cancelar
-                      </button>
-                      <button 
+                      </Button>
+                      <Button 
                         type="submit" 
-                        className="inline-flex justify-center rounded-md border border-transparent bg-yellow-400 px-4 py-2 text-sm font-medium text-black shadow-sm hover:bg-yellow-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500 disabled:opacity-50"
+                        variant='primary'
                         disabled={isLoading}
                       >
                         {isLoading ? (
@@ -262,7 +262,7 @@ function TermsAdminPage({ user }: Props) {
                             Salvando...
                           </>
                         ) : currentAction === 'create' ? 'Adicionar' : 'Atualizar'}
-                      </button>
+                      </Button>
                     </div>
                   </form>
                 </Dialog.Panel>

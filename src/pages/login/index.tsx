@@ -63,7 +63,6 @@ export default function LoginPage() {
     }
   }, [isAdmin, cnpjValue, setValue])
 
-  // Função para lidar com a mudança de tipo de pessoa com animação
   const handlePersonTypeChange = (type: 'PF' | 'PJ') => {
     if (type === personType) return;
     

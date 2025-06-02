@@ -27,8 +27,9 @@ import {
   getCitiesByStateCode, 
   State 
 } from '@/services/addressService'
-import { BackButton } from '@/components/shared/BackButton'
-
+import { Input } from '@/components/shared/Input'
+import { Button } from '@/components/shared/Button'
+ 
 interface Country {
   code: string
   name: string
@@ -295,21 +296,25 @@ function ClientEditPage() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Nome</label>
-                  <input
+                  <Input
+                    id="name"
+                    name="name"
                     type="text"
+                    placeholder='Digite o nome do cliente'
                     value={client.name}
                     onChange={e => setClient({ ...client, name: e.target.value })}
-                    className="w-full border border-gray-300 text-gray-700 rounded-md shadow-sm px-3 py-2 focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 transition-colors"
                     disabled={isLoading}
                   />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">CPF/CNPJ</label>
-                  <input
+                  <Input
+                    id="cpfCnpj"
+                    name="cpfCnpj"
                     type="text"
+                    placeholder='Digite o CPF ou CNPJ do cliente'
                     value={client.cpfCnpj}
                     onChange={e => setClient({ ...client, cpfCnpj: e.target.value })}
-                    className="w-full border text-gray-700 border-gray-300 rounded-md shadow-sm px-3 py-2 focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 transition-colors"
                     disabled={isLoading}
                   />
                 </div>
@@ -342,7 +347,9 @@ function ClientEditPage() {
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">CEP</label>
                     <div className="relative">
-                      <input
+                      <Input
+                        id="cep"
+                        name="cep"
                         type="text"
                         value={client.cep ?? ''}
                         onChange={e => {
@@ -350,7 +357,6 @@ function ClientEditPage() {
                           setClient({ ...client, cep: value })
                           handleCepChange(value)
                         }}
-                        className="w-full border text-gray-700 border-gray-300 rounded-md shadow-sm px-3 py-2 focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 transition-colors"
                         disabled={isLoading}
                         placeholder="00000-000"
                       />
@@ -396,24 +402,26 @@ function ClientEditPage() {
                   {/* Número */}
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">Número</label>
-                    <input
+                    <Input
+                      id="number"
+                      name="number"
                       type="text"
                       value={client.number ?? ''}
                       onChange={e => setClient({ ...client, number: e.target.value })}
-                      className="w-full text-gray-700 border border-gray-300 rounded-md shadow-sm px-3 py-2 focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 transition-colors"
                       disabled={isLoading}
-                      placeholder="15"
+                      placeholder="1234"
                     />
                   </div>
 
                   {/* Complemento */}
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">Complemento</label>
-                    <input
+                    <Input
+                      id="complement"
+                      name="complement"
                       type="text"
                       value={client.complement ?? ''}
                       onChange={e => setClient({ ...client, complement: e.target.value })}
-                      className="w-full text-gray-700 border border-gray-300 rounded-md shadow-sm px-3 py-2 focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 transition-colors"
                       disabled={isLoading}
                       placeholder="Apto 101, Bloco B, etc."
                     />
@@ -422,11 +430,12 @@ function ClientEditPage() {
                   {/* Bairro */}
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">Bairro</label>
-                    <input
+                    <Input
+                      id="neighborhood"
+                      name="neighborhood"
                       type="text"
                       value={client.neighborhood ?? ''}
                       onChange={e => setClient({ ...client, neighborhood: e.target.value })}
-                      className="w-full text-gray-700 border border-gray-300 rounded-md shadow-sm px-3 py-2 focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 transition-colors"
                       disabled={isLoading}
                       placeholder="Jardim das Flores"
                     />
@@ -435,11 +444,12 @@ function ClientEditPage() {
                   {/* Rua */}
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">Rua</label>
-                    <input
+                    <Input
+                      id="street"
+                      name="street"
                       type="text"
                       value={client.street ?? ''}
                       onChange={e => setClient({ ...client, street: e.target.value })}
-                      className="w-full text-gray-700 border border-gray-300 rounded-md shadow-sm px-3 py-2 focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 transition-colors"
                       disabled={isLoading}
                       placeholder="Rua das Palmeiras"
                     />
@@ -473,17 +483,15 @@ function ClientEditPage() {
             <div className="px-6 py-4 border-b border-gray-200">
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 <h2 className="text-lg font-semibold text-gray-900">Usuários do Cliente</h2>
-                <button
-                  onClick={() => { 
+                <Button 
+                    variant="add" onClick={() => { 
                     setUserAction('create'); 
                     setEditingUser(null); 
                     setIsUserModalOpen(true) 
                   }}
-                  disabled={isLoading}
-                  className="inline-flex items-center px-4 py-2 bg-yellow-400 text-black text-sm font-medium rounded-md hover:bg-yellow-500 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                >
+                  disabled={isLoading}>
                   Novo Usuário
-                </button>
+                </Button>
               </div>
             </div>
 
@@ -538,26 +546,26 @@ function ClientEditPage() {
                       }} className="p-6 space-y-4">
                         <div>
                           <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">Nome</label>
-                          <input 
+                          <Input 
                             id="name" 
                             name="name" 
                             type="text" 
+                            placeholder="Digite o nome do usuário"
                             defaultValue={editingUser?.name} 
                             required 
-                            className="w-full text-gray-700 border border-gray-300 rounded-md shadow-sm px-3 py-2 focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 transition-colors" 
                             disabled={isLoading}
                           />
                         </div>
                         
                         <div>
                           <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">Email</label>
-                          <input 
+                          <Input 
                             id="email" 
                             name="email" 
                             type="email" 
+                            placeholder="Digite o email do usuário"
                             defaultValue={editingUser?.email} 
                             required 
-                            className="w-full text-gray-700 border border-gray-300 rounded-md shadow-sm px-3 py-2 focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 transition-colors" 
                             disabled={isLoading}
                           />
                         </div>
@@ -565,26 +573,26 @@ function ClientEditPage() {
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                           <div>
                             <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-1">Telefone</label>
-                            <input 
+                            <Input 
                               id="phone" 
                               name="phone" 
                               type="text" 
+                              placeholder="Digite o telefone do usuário"
                               defaultValue={editingUser?.phone} 
                               required 
-                              className="w-full text-gray-700 border border-gray-300 rounded-md shadow-sm px-3 py-2 focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 transition-colors" 
                               disabled={isLoading}
                             />
                           </div>
                           
                           <div>
                             <label htmlFor="cpfCnpj" className="block text-sm font-medium text-gray-700 mb-1">CPF/CNPJ</label>
-                            <input 
+                            <Input 
                               id="cpfCnpj" 
                               name="cpfCnpj" 
                               type="text" 
+                              placeholder="Digite o CPF ou CNPJ do usuário"
                               defaultValue={editingUser?.cpfCnpj} 
                               required 
-                              className="w-full text-gray-700 border border-gray-300 rounded-md shadow-sm px-3 py-2 focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 transition-colors" 
                               disabled={isLoading}
                             />
                           </div>
@@ -627,21 +635,22 @@ function ClientEditPage() {
                         )}
                         
                         <div className="flex flex-col sm:flex-row justify-end gap-3 pt-4">
-                          <button 
-                            type="button" 
-                            onClick={() => setIsUserModalOpen(false)} 
-                            className="px-4 py-2  border border-gray-300 rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-colors"
+                          <Button
+                            type="button"
+                            onClick={() => setIsUserModalOpen(false)}
+                            variant="neutral"
                             disabled={isLoading}
                           >
                             Cancelar
-                          </button>
-                          <button 
-                            type="submit" 
-                            disabled={isLoading} 
-                            className="px-4 py-2 bg-yellow-400 rounded-md text-black font-medium hover:bg-yellow-500 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                          </Button>
+
+                          <Button
+                            type="submit"
+                            variant={userAction === 'create' ? 'add' : 'primary'}
+                            disabled={isLoading}
                           >
                             {userAction === 'create' ? 'Adicionar' : 'Atualizar'}
-                          </button>
+                          </Button>
                         </div>
                       </form>
                     </Dialog.Panel>

@@ -14,6 +14,8 @@ import { ConfirmationModal } from '@/components/shared/ConfirmationModal'
 import { usePagedData } from '@/hooks/usePagedData'
 import { getAllPlans, createPlan, updatePlan, deletePlan } from '@/services/planService'
 import { SearchBar } from '@/components/shared/SearchBar'
+import { Input } from '@/components/shared/Input'
+import { Button } from '@/components/shared/Button'
 
 interface Plan {
   id?: string
@@ -137,7 +139,6 @@ function PlansAdminPage({ user }: Props) {
     { key: 'actions', header: 'Ações', render: (_: any, plan: Plan) => (
       <div className="flex space-x-2">
         <ActionButton variant="edit" onClick={() => handleEditPlan(plan)} disabled={isLoading} />
-        {/* <ActionButton variant="delete" onClick={() => handleDeleteConfirmation(plan)} disabled={isLoading} /> */}
       </div>
     )}
   ]
@@ -230,14 +231,13 @@ function PlansAdminPage({ user }: Props) {
                   >
                     <div>
                       <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">Nome do Plano</label>
-                      <input 
+                      <Input 
                         id="name"
                         name="name" 
                         type="text"
                         required
                         placeholder="Ex: Plano Mensal"
                         defaultValue={editingPlan?.name || ''} 
-                        className="w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-yellow-500 focus:border-yellow-500 text-gray-500" 
                         disabled={isLoading}
                       />
                     </div>
@@ -257,7 +257,7 @@ function PlansAdminPage({ user }: Props) {
                     
                     <div>
                       <label htmlFor="price" className="block text-sm font-medium text-gray-700 mb-1">Preço (R$)</label>
-                      <input 
+                      <Input 
                         id="price"
                         name="price" 
                         type="number"
@@ -265,23 +265,21 @@ function PlansAdminPage({ user }: Props) {
                         min="0"
                         required
                         placeholder="0.00"
-                        defaultValue={editingPlan?.price || ''} 
-                        className="w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-yellow-500 focus:border-yellow-500 text-gray-500" 
+                        defaultValue={editingPlan?.price.toString()} 
                         disabled={isLoading}
                       />
                     </div>
                     
                     <div>
                       <label htmlFor="durationDays" className="block text-sm font-medium text-gray-700 mb-1">Duração (dias)</label>
-                      <input 
+                      <Input 
                         id="durationDays"
                         name="durationDays" 
                         type="number"
                         min="1"
                         required
                         placeholder="30"
-                        defaultValue={editingPlan?.durationDays || ''} 
-                        className="w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-yellow-500 focus:border-yellow-500 text-gray-500" 
+                        defaultValue={editingPlan?.durationDays.toString() || '30'} 
                         disabled={isLoading}
                       />
                       <p className="text-xs text-gray-500 mt-1">
@@ -291,15 +289,14 @@ function PlansAdminPage({ user }: Props) {
 
                     <div>
                       <label htmlFor="numberOfUsers" className="block text-sm font-medium text-gray-700 mb-1">Quantidade de usuários</label>
-                      <input 
+                      <Input 
                         id="numberOfUsers"
                         name="numberOfUsers" 
                         type="number"
                         min="1"
                         required
                         placeholder="30"
-                        defaultValue={editingPlan?.numberOfUsers || 1} 
-                        className="w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-yellow-500 focus:border-yellow-500 text-gray-500" 
+                        defaultValue={editingPlan?.numberOfUsers.toString() || '1'} 
                         disabled={isLoading}
                       />
                       <p className="text-xs text-gray-500 mt-1">
@@ -342,17 +339,17 @@ function PlansAdminPage({ user }: Props) {
                     </div>
                     
                     <div className="flex justify-end gap-3 pt-4">
-                      <button
+                      <Button
                         type="button"
-                        className="inline-flex justify-center rounded-md border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500 disabled:opacity-50"
+                        variant="neutral"
                         onClick={() => setIsOpenModal(false)}
                         disabled={isLoading}
                       >
                         Cancelar
-                      </button>
-                      <button 
+                      </Button>
+                      <Button 
                         type="submit" 
-                        className="inline-flex justify-center rounded-md border border-transparent bg-yellow-400 px-4 py-2 text-sm font-medium text-black shadow-sm hover:bg-yellow-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500 disabled:opacity-50"
+                        variant="primary"
                         disabled={isLoading}
                       >
                         {isLoading ? (
@@ -364,7 +361,7 @@ function PlansAdminPage({ user }: Props) {
                             Salvando...
                           </>
                         ) : currentAction === 'create' ? 'Adicionar' : 'Atualizar'}
-                      </button>
+                      </Button>
                     </div>
                   </form>
                 </Dialog.Panel>
