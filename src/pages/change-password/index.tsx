@@ -50,7 +50,8 @@ export default function ChangePasswordPage() {
   async function onSubmit(data: FormData) {
     setLoadingChange(true)
     try {
-      await changePassword({
+      // TODO: Replace 'null' with the actual user object if available
+      await changePassword(null, {
         currentPassword: data.currentPassword,
         code: data.code,
         newPassword: data.newPassword,
