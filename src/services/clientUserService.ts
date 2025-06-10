@@ -40,3 +40,28 @@ export async function updateClientUser(id: string, payload: Partial<ClientUser> 
     throw error
   }
 }
+/**
+ * Busca um clientUser por ID
+ */
+export async function getClientUserById(id: string): Promise<ClientUser> {
+  try {
+    const response = await api.get(`/client-users/${id}`)
+    return response.data
+  } catch (error: any) {
+    console.error('Erro ao buscar client user:', error)
+    return Promise.reject({ message: 'Erro ao buscar client user por ID.' })
+  }
+}
+
+/**
+ * Lista todos os clientUsers
+ */
+export async function getAllClientUsers(): Promise<ClientUser[]> {
+  try {
+    const response = await api.get('/client-users')
+    return response.data
+  } catch (error: any) {
+    console.error('Erro ao buscar client users:', error)
+    return Promise.reject({ message: 'Erro ao listar client users.' })
+  }
+}

@@ -38,6 +38,18 @@ export async function getAllPlans(): Promise<Plan[]> {
 }
 
 /**
+ * Lista apenas os planos ativos (para exibição no registro de clientes)
+ */
+export async function getActivePlans(): Promise<Plan[]> {
+  try {
+    const response = await api.get('/plans?isActive=true')
+    return response?.data
+  } catch (error: any) {
+    console.error('Erro ao buscar planos ativos:', error)
+    return Promise.reject({ message: 'Erro ao listar os planos ativos.' })
+  }
+}
+/**
  * Busca um plano por ID
  */
 export async function getPlanById(id: string): Promise<Plan> {

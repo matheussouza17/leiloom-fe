@@ -21,18 +21,32 @@ type FormData = z.infer<typeof schema>
 export default function BackOfficeLoginPage() {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
-  const { login } = useAuthContext()
+  const { user, login, isLoading } = useAuthContext()
   const { register, handleSubmit, formState: { errors } } = useForm<FormData>({
     resolver: zodResolver(schema),
     defaultValues: { login: '', password: '' }
   })
 
-   useEffect(() => {
-      if (typeof window !== 'undefined' && (localStorage.getItem('backofficeToken')||localStorage.getItem('clientToken'))) {
-        localStorage.removeItem('clientToken')
-        localStorage.removeItem('backofficeToken')
+  useEffect(() => {
+    // Aguarda o loading inicial terminar
+    if (isLoading) return
+
+    // Se já está autenticado, redireciona para o dashboard apropriado
+    if (user) {
+      if (user.context === 'BACKOFFICE') {
+        router.push('/dashboard-backoffice')
+      } else if (user.context === 'CLIENT') {
+        router.push('/dashboard-client') // ou a página principal do cliente
       }
-    }, [])
+      return
+    }
+
+    // Remove tokens existentes apenas após confirmar que não há usuário
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('clientToken')
+      localStorage.removeItem('backofficeToken')
+    }
+  }, [user, isLoading, router])
 
   async function onSubmit(data: FormData) {
     setLoading(true)
@@ -42,7 +56,7 @@ export default function BackOfficeLoginPage() {
         password: data.password,
         context: 'BACKOFFICE' as const
       })
-      localStorage.setItem('backofficeToken', token)
+      
       login(token, 'BACKOFFICE')
       toast.success('Bem-vindo ao Back-Office!')
       router.push('/dashboard-backoffice')
@@ -58,6 +72,34 @@ export default function BackOfficeLoginPage() {
     }
   }
 
+  // Mostra loading enquanto verifica autenticação
+  if (isLoading) {
+    return (
+      <MainLayout>
+        <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-yellow-600 mx-auto mb-4"></div>
+            <p className="text-gray-600">Verificando autenticação...</p>
+          </div>
+        </div>
+      </MainLayout>
+    )
+  }
+
+  // Se está autenticado, não mostra o formulário (redirecionamento já foi feito)
+  if (user) {
+    return (
+      <MainLayout>
+        <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-yellow-600 mx-auto mb-4"></div>
+            <p className="text-gray-600">Redirecionando...</p>
+          </div>
+        </div>
+      </MainLayout>
+    )
+  }
+
   return (
     <MainLayout>
       <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
@@ -71,20 +113,21 @@ export default function BackOfficeLoginPage() {
                 type="text"
                 {...register('login')}
                 className="w-full border rounded px-3 py-2 text-black focus:ring-2 focus:ring-yellow-400 outline-none"
+                disabled={loading}
               />
               {errors.login && <p className="text-red-500 text-xs mt-1">{errors.login.message}</p>}
             </div>
 
             <div>
               <label className="block text-sm text-black font-medium mb-1">Senha</label>
-              <PasswordField register={register('password')} error={errors.password} />
+              <PasswordField register={register('password')} error={errors.password} disabled={loading} />
               {errors.password && <p className="text-red-500 text-xs mt-1">{errors.password.message}</p>}
             </div>
 
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-yellow-400 text-black py-2 rounded hover:bg-yellow-300 transition"
+              className="w-full bg-yellow-400 text-black py-2 rounded hover:bg-yellow-300 transition disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loading ? 'Entrando...' : 'Entrar'}
             </button>

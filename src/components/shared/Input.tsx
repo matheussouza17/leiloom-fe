@@ -37,7 +37,11 @@ export function Input({
         value={value}
         defaultValue={defaultValue}
         onChange={onChange}
-        className="w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-yellow-500 focus:border-yellow-500 text-gray-500"
+        className={`w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-yellow-500 focus:border-yellow-500 transition-colors ${
+          disabled 
+            ? 'bg-gray-50 text-gray-400 cursor-not-allowed' 
+            : 'text-gray-900 bg-white'
+        }`}
         disabled={disabled}
         step={step}
         min={min}

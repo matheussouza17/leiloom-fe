@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import { useState } from 'react'
-import { ArrowRightIcon, Bars3Icon, XMarkIcon, UserCircleIcon, ArrowRightOnRectangleIcon } from '@heroicons/react/20/solid'      // ajuste para o caminho real
+import { ArrowRightIcon, Bars3Icon, XMarkIcon, UserCircleIcon, ArrowRightOnRectangleIcon } from '@heroicons/react/20/solid'
 import { useRouter } from 'next/navigation'
 import { useAuthContext } from '@/contexts/AuthContext'
 
@@ -11,13 +11,15 @@ export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false)
   const router = useRouter()
   
-  const { user, logout } = useAuthContext()
+  const { user, logout, isLoading } = useAuthContext()
   const isAuthenticated = !!user
 
-const handleLogout = () => {
-  logout('CLIENT') 
-  router.push('/')
-}
+  const handleLogout = () => {
+    // Determina o contexto baseado no usuário atual
+    const context = user?.context || 'CLIENT'
+    logout(context) 
+    router.push('/')
+  }
 
   return (
     <header className="bg-neutral-900 text-white text-xs font-medium">
@@ -48,14 +50,16 @@ const handleLogout = () => {
           </div>
 
           <Link href="#" className="hover:text-yellow-400 transition">Opção All</Link>
-          {user?.context === 'CLIENT' && (
+          
+          {/* Só mostra menus específicos após carregar e confirmar contexto */}
+          {!isLoading && user?.context === 'CLIENT' && (
           <>
             <Link href="#" className="hover:text-yellow-400 transition">
               Opção Cliente
             </Link>
           </>
         )}
-          {user?.context === 'BACKOFFICE' && (
+          {!isLoading && user?.context === 'BACKOFFICE' && (
           <>
             <Link href="/backoffice/terms" className="hover:text-yellow-400 transition">
               Termos
@@ -67,13 +71,21 @@ const handleLogout = () => {
               Clientes
           </Link>
           </>
-          
         )}
         </nav>
 
         {/* Ações Desktop */}
         <div className="hidden md:flex items-center gap-4">
-          {isAuthenticated ? (
+          {isLoading ? (
+            // Skeleton loading para ações do usuário
+            <div className="flex items-center gap-4">
+              <div className="animate-pulse flex items-center gap-2">
+                <div className="h-4 w-4 bg-gray-600 rounded-full"></div>
+                <div className="h-3 w-20 bg-gray-600 rounded"></div>
+              </div>
+              <div className="animate-pulse h-7 w-16 bg-gray-600 rounded"></div>
+            </div>
+          ) : isAuthenticated ? (
             <>
               <Link
                 href="/profile"
@@ -128,7 +140,9 @@ const handleLogout = () => {
 
             {/* links gerais */}
             <Link href="#" onClick={() => setIsOpen(false)} className="hover:text-yellow-600">Leilões</Link>
-            {user?.context === 'CLIENT' && (
+            
+            {/* Links específicos do contexto - só mostra após carregar */}
+            {!isLoading && user?.context === 'CLIENT' && (
               <Link
                 href="#"
                 onClick={() => setIsOpen(false)}
@@ -137,7 +151,7 @@ const handleLogout = () => {
                 Opção Cliente
               </Link>
             )}
-            {user?.context === 'BACKOFFICE' && (
+            {!isLoading && user?.context === 'BACKOFFICE' && (
               <>
                 <Link
                   href="/backoffice/terms"
@@ -165,7 +179,16 @@ const handleLogout = () => {
             <hr />
 
             {/* Ações Mobile */}
-            {isAuthenticated ? (
+            {isLoading ? (
+              // Loading skeleton para mobile
+              <div className="space-y-3">
+                <div className="animate-pulse flex items-center gap-2">
+                  <div className="h-4 w-4 bg-gray-300 rounded-full"></div>
+                  <div className="h-3 w-16 bg-gray-300 rounded"></div>
+                </div>
+                <div className="animate-pulse h-8 w-24 bg-gray-300 rounded"></div>
+              </div>
+            ) : isAuthenticated ? (
               <>
                 <Link
                   href="/profile"
@@ -198,7 +221,6 @@ const handleLogout = () => {
                   Criar conta
                 </Link>
               </>
-              
             )}
           </div>
         </div>

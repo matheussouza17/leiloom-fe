@@ -26,13 +26,14 @@ export default function LoginPage() {
   const [personType, setPersonType] = useState<'PF' | 'PJ'>('PF')
   const [isAdmin, setIsAdmin] = useState(false)
   const [isTransitioning, setIsTransitioning] = useState(false)
-  const { login } = useAuthContext()
+  const { user, login, isLoading } = useAuthContext()
 
   const {
     register,
     handleSubmit,
     setValue,
     watch,
+    reset,
     formState: { errors },
   } = useForm<FormData>({
     resolver: zodResolver(schema),
@@ -48,12 +49,26 @@ export default function LoginPage() {
     setValue('personType', personType)
   }, [personType, setValue])
 
-   useEffect(() => {
-    if (typeof window !== 'undefined' && (localStorage.getItem('backofficeToken')||localStorage.getItem('clientToken'))) {
+  useEffect(() => {
+    // Aguarda o loading inicial terminar
+    if (isLoading) return
+
+    // Se já está autenticado, redireciona para o dashboard apropriado
+    if (user) {
+      if (user.context === 'CLIENT') {
+        router.push('/dashboard-client')
+      } else if (user.context === 'BACKOFFICE') {
+        router.push('/dashboard-backoffice')
+      }
+      return
+    }
+
+    // Remove tokens existentes apenas após confirmar que não há usuário
+    if (typeof window !== 'undefined') {
       localStorage.removeItem('clientToken')
       localStorage.removeItem('backofficeToken')
     }
-  }, [])
+  }, [user, isLoading, router])
 
   const cnpjValue = watch('cnpj')
   
@@ -73,6 +88,10 @@ export default function LoginPage() {
       if (type === 'PF') {
         setIsAdmin(false);
         setValue('cnpj', '');
+        setValue('login', ''); // Limpa o campo login ao trocar para PF
+      } else {
+        // Ao trocar para PJ, limpa o campo login
+        setValue('login', '');
       }
       
       setTimeout(() => {
@@ -82,6 +101,12 @@ export default function LoginPage() {
   };
 
   async function onSubmit(data: FormData) {
+    // Validação adicional para PJ
+    if (personType === 'PJ' && !data.cnpj?.trim()) {
+      toast.error('CNPJ ou E-mail da empresa é obrigatório.')
+      return
+    }
+
     setLoading(true)
 
     try {
@@ -95,12 +120,7 @@ export default function LoginPage() {
         }),
       }
       
-      if (personType === 'PJ' && !data.cnpj) {
-        return toast.error('CNPJ ou E-mail da empresa é obrigatório.')
-      }  
-      
       const token = await loginClient(payload)
-      localStorage.setItem('clientToken', token)
       login(token, 'CLIENT') 
       toast.success('Login realizado com sucesso!')
       router.push('/dashboard-client')
@@ -118,6 +138,34 @@ export default function LoginPage() {
     }
   }
 
+  // Mostra loading enquanto verifica autenticação
+  if (isLoading) {
+    return (
+      <MainLayout>
+        <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-yellow-600 mx-auto mb-4"></div>
+            <p className="text-gray-600">Verificando autenticação...</p>
+          </div>
+        </div>
+      </MainLayout>
+    )
+  }
+
+  // Se está autenticado, não mostra o formulário (redirecionamento já foi feito)
+  if (user) {
+    return (
+      <MainLayout>
+        <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-yellow-600 mx-auto mb-4"></div>
+            <p className="text-gray-600">Redirecionando...</p>
+          </div>
+        </div>
+      </MainLayout>
+    )
+  }
+
   return (
     <MainLayout>
       <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
@@ -131,7 +179,8 @@ export default function LoginPage() {
                 <button
                   type="button"
                   onClick={() => handlePersonTypeChange('PF')}
-                  className={`flex-1 py-2 px-4 text-sm rounded-full transition-all duration-300 ${
+                  disabled={loading}
+                  className={`flex-1 py-2 px-4 text-sm rounded-full transition-all duration-300 disabled:opacity-50 ${
                     personType === 'PF' 
                       ? 'bg-yellow-400 text-black font-medium shadow-sm' 
                       : 'text-gray-600 hover:bg-gray-200'
@@ -142,7 +191,8 @@ export default function LoginPage() {
                 <button
                   type="button"
                   onClick={() => handlePersonTypeChange('PJ')}
-                  className={`flex-1 py-2 px-4 text-sm rounded-full transition-all duration-300 ${
+                  disabled={loading}
+                  className={`flex-1 py-2 px-4 text-sm rounded-full transition-all duration-300 disabled:opacity-50 ${
                     personType === 'PJ' 
                       ? 'bg-yellow-400 text-black font-medium shadow-sm' 
                       : 'text-gray-600 hover:bg-gray-200'
@@ -158,12 +208,17 @@ export default function LoginPage() {
               {personType === 'PJ' && (
                 <>
                   <div>
-                    <label className="block text-sm text-black font-medium mb-1">CNPJ ou E-mail da empresa</label>
+                    <label className="block text-sm text-black font-medium mb-1">
+                      CNPJ ou E-mail da empresa *
+                    </label>
                     <input
                       type="text"
                       {...register('cnpj')}
-                      className="w-full border border-gray-300 rounded px-3 py-2 text-black focus:ring-2 focus:ring-yellow-400 focus:border-transparent outline-none transition-all"
+                      disabled={loading}
+                      className="w-full border border-gray-300 rounded px-3 py-2 text-black focus:ring-2 focus:ring-yellow-400 focus:border-transparent outline-none transition-all disabled:bg-gray-100 disabled:cursor-not-allowed"
+                      placeholder="Digite o CNPJ ou e-mail da empresa"
                     />
+                    {errors.cnpj && <p className="text-red-500 text-xs mt-1">{errors.cnpj.message}</p>}
                   </div>
 
                   <div className="flex items-center gap-2 text-sm text-black">
@@ -173,11 +228,14 @@ export default function LoginPage() {
                           type="checkbox"
                           id="isAdmin"
                           checked={isAdmin}
+                          disabled={loading}
                           onChange={(e) => {
                             const checked = e.target.checked
                             setIsAdmin(checked)
                             if (checked && cnpjValue) {
                               setValue('login', cnpjValue)
+                            } else {
+                              setValue('login', '') // Limpa o campo se desmarcar
                             }
                           }}
                           className="sr-only" // Esconde o checkbox original
@@ -186,7 +244,7 @@ export default function LoginPage() {
                           isAdmin 
                             ? 'bg-yellow-400 border-yellow-500' 
                             : 'bg-white border-gray-300'
-                        }`}>
+                        } ${loading ? 'opacity-50' : ''}`}>
                           {isAdmin && (
                             <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mx-auto mt-0.5 text-black" viewBox="0 0 20 20" fill="currentColor">
                               <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
@@ -194,7 +252,7 @@ export default function LoginPage() {
                           )}
                         </div>
                       </div>
-                      <span>Sou o administrador</span>
+                      <span className={loading ? 'opacity-50' : ''}>Sou o administrador</span>
                     </label>
                   </div>
                 </>
@@ -204,25 +262,32 @@ export default function LoginPage() {
               {!(personType === 'PJ' && isAdmin) && (
                 <div>
                   <label className="block text-sm text-black font-medium mb-1">
-                    {personType === 'PF' ? 'CPF ou E-mail' : 'CNPJ ou E-mail'}
+                    {personType === 'PF' ? 'CPF ou E-mail' : 'CNPJ ou E-mail'} *
                   </label>
                   <input
                     type="text"
                     {...register('login')}
-                    className="w-full border border-gray-300 rounded px-3 py-2 text-black focus:ring-2 focus:ring-yellow-400 focus:border-transparent outline-none transition-all"
+                    disabled={loading}
+                    className="w-full border border-gray-300 rounded px-3 py-2 text-black focus:ring-2 focus:ring-yellow-400 focus:border-transparent outline-none transition-all disabled:bg-gray-100 disabled:cursor-not-allowed"
+                    placeholder={personType === 'PF' ? 'Digite seu CPF ou e-mail' : 'Digite o CNPJ ou e-mail'}
                   />
                   {errors.login && <p className="text-red-500 text-xs mt-1">{errors.login.message}</p>}
                 </div>
               )}
 
               <div>
-                <label className="block text-sm text-black font-medium mb-1">Senha</label>
-                <PasswordField register={register('password')} error={errors.password} />
+                <label className="block text-sm text-black font-medium mb-1">Senha *</label>
+                <PasswordField register={register('password')} error={errors.password} disabled={loading} />
                 {errors.password && <p className="text-red-500 text-xs mt-1">{errors.password.message}</p>}
               </div>
 
               <div className="flex justify-between items-center text-sm">
-                <a href="/forgot-password" className="text-yellow-600 hover:underline font-medium">
+                <a 
+                  href="/forgot-password" 
+                  className={`text-yellow-600 hover:underline font-medium transition-opacity ${
+                    loading ? 'opacity-50 pointer-events-none' : ''
+                  }`}
+                >
                   Esqueci a senha
                 </a>
               </div>
@@ -230,7 +295,7 @@ export default function LoginPage() {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full bg-yellow-400 text-black py-2.5 rounded-lg hover:bg-yellow-300 focus:ring-4 focus:ring-yellow-200 font-medium transition-all duration-300 shadow-sm"
+                className="w-full bg-yellow-400 text-black py-2.5 rounded-lg hover:bg-yellow-300 focus:ring-4 focus:ring-yellow-200 font-medium transition-all duration-300 shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {loading ? 'Entrando...' : 'Entrar'}
               </button>

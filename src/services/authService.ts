@@ -156,13 +156,15 @@ export async function resetPassword(payload: {
 }
 
 /**
- * Solicita alteração de senha do usuário logado
+ * Solicita alteração de senha do usuário logado (versão que aceita user como parâmetro)
+ * @param user Dados do usuário do contexto
  * @returns Dados da solicitação de alteração de senha
  * @throws Erro em caso de falha na requisição
  */
-export async function requestChangePassword() {
+export async function requestChangePassword(user?: any) {
   try {
-    return await api.post('/auth/change-password-request')
+    const response = await api.post('/auth/change-password-request')
+    return response.data
   } catch (error: any) {
     console.error('Erro ao solicitar alteração de senha:', error)
     if (error?.response?.status === 401) {
@@ -172,19 +174,23 @@ export async function requestChangePassword() {
   }
 }
 
+
+
 /**
- * Altera a senha do usuário logado
+ * Altera a senha do usuário logado (versão que aceita user como parâmetro)
+ * @param user Dados do usuário do contexto  
  * @param payload Objeto contendo senha atual, código e nova senha
  * @returns Dados da alteração de senha
  * @throws Erro em caso de falha na requisição
  */
-export async function changePassword(payload: {
+export async function changePassword(user: any, payload: {
   currentPassword: string
   code: string
   newPassword: string
 }) {
   try {
-    return await api.post('/auth/change-password', payload)
+    const response = await api.post('/auth/change-password', payload)
+    return response.data
   } catch (error: any) {
     console.error('Erro ao alterar senha:', error)
     if (error?.response?.status === 400) {
@@ -196,3 +202,5 @@ export async function changePassword(payload: {
     return Promise.reject({ message: 'Erro ao alterar senha.' })
   }
 }
+
+

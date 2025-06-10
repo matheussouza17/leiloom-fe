@@ -6,7 +6,7 @@ import Link from 'next/link'
 import { useAuthContext } from '@/contexts/AuthContext'
 
 export default function MainLayout({ children }: { children: React.ReactNode }) {
-  const { user } = useAuthContext()
+  const { user, isLoading } = useAuthContext()
   const isAuthenticated = !!user
   
   return (
@@ -18,7 +18,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
           <div className="text-sm">
             © {new Date().getFullYear()} - Leiloom. Todos os direitos reservados.
           </div>
-          {!isAuthenticated && (
+          {!isLoading && !isAuthenticated && (
             <Link 
               href="/login-backoffice" 
               className="flex items-center gap-1 text-sm text-gray-500 hover:text-gray-700 transition mt-2 md:mt-0"
@@ -26,6 +26,11 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
               <LockClosedIcon className="h-4 w-4" />
               Backoffice
             </Link>
+          )}
+          {isLoading && (
+            <div className="animate-pulse mt-2 md:mt-0">
+              <div className="h-4 w-20 bg-gray-300 rounded"></div>
+            </div>
           )}
         </div>
       </footer>
